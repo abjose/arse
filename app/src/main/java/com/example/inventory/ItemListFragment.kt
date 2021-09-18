@@ -27,8 +27,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.inventory.data.Item
 import com.example.inventory.databinding.ItemListFragmentBinding
+import kotlinx.android.synthetic.main.item_list_fragment.*
+
 // import com.example.inventory.databinding.ItemPagerBinding
 
 /**
@@ -43,6 +46,7 @@ class ItemListFragment : Fragment() {
 
     private var _binding: ItemListFragmentBinding? = null
     private val binding get() = _binding!!
+    private val na = NetworkActivity()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,7 +85,6 @@ class ItemListFragment : Fragment() {
                     Log.v("SWIPED", viewHolder.itemView.tag.toString());
                     viewModel.markItemRead(viewHolder.itemView.tag as Int)
 
-
                     // testRss()
                     // testDB()
                     // testXML()
@@ -89,6 +92,16 @@ class ItemListFragment : Fragment() {
             }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+
+        swipe_refresh.setOnRefreshListener {
+            val LOG_TAG = "REFRESH"
+            Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout")
+            
+            // myUpdateOperation()
+            na.loadPage()
+
+            swipe_refresh.isRefreshing = false
+        }
 
         // Attach an observer on the allItems list to update the UI automatically when the data
         // changes.

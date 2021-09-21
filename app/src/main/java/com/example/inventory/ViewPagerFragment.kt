@@ -57,7 +57,7 @@ class ViewPagerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val id = navigationArgs.itemId
+        // val id = navigationArgs.itemId
         val position = navigationArgs.itemPosition
 
 //        // Retrieve the item details using the itemId.

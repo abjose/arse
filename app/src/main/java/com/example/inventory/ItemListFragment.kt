@@ -63,7 +63,7 @@ class ItemListFragment : Fragment() {
         // RecyclerView
         val adapter = ItemListAdapter { item: Item, position: Int ->
             // val action = ItemListFragmentDirections.actionItemListFragmentToItemDetailFragment(it.id)
-            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(item.id, position)
+            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(item.postId, item.feedName, position)
             this.findNavController().navigate(action)
         }
         binding.recyclerView.layoutManager = LinearLayoutManager(this.context)
@@ -82,8 +82,10 @@ class ItemListFragment : Fragment() {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     adapter.onItemDismiss(viewHolder.adapterPosition)
 
-                    Log.v("SWIPED", viewHolder.itemView.tag.toString());
-                    viewModel.markItemRead(viewHolder.itemView.tag as Int)
+                    val postId = viewHolder.itemView.getTag("postId".hashCode()) as Int
+                    val feedName = viewHolder.itemView.getTag("feedName".hashCode()) as String
+                    Log.v("SWIPED", postId.toString() + ", " + feedName);
+                    viewModel.markItemRead(postId, feedName)
 
                     // testRss()
                     // testDB()
@@ -96,9 +98,9 @@ class ItemListFragment : Fragment() {
         swipe_refresh.setOnRefreshListener {
             val LOG_TAG = "REFRESH"
             Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout")
-            
+
             // myUpdateOperation()
-            na.loadPage()
+            na.loadPage(viewModel)
 
             swipe_refresh.isRefreshing = false
         }

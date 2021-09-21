@@ -12,9 +12,17 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 // We don't use namespaces
 private val ns: String? = null
+
+// Likely a good reference:
+// https://github.com/prof18/RSS-Parser/blob/master/rssparser/src/main/java/com/prof/rssparser/core/CoreXMLParser.kt
 
 class StackOverflowXmlParser {
     var TAG = "StackOverflowXmlParser"
@@ -41,24 +49,26 @@ class StackOverflowXmlParser {
         // parser.require(XmlPullParser.START_TAG, ns, "feed")
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
-                Log.i(TAG, "continuing, eventType: " + parser.eventType)
+                // Log.i(TAG, "continuing, eventType: " + parser.eventType)
                 continue
             }
             // Starts by looking for the entry tag
             // if (parser.name == "entry") {
             if (parser.name == "channel") {
-                Log.i(TAG, "channel; continuing")
+                // Log.i(TAG, "channel; continuing")
                 parser.next()
             } else if (parser.name == "item" || parser.name == "entry") {
-                Log.i(TAG, "reading item/entry")
+                // Log.i(TAG, "reading item/entry")
                 entries.add(readEntry(parser))
             } else {
-                Log.i(TAG, "skipping, name: " + parser.name)
+                // Log.i(TAG, "skipping, name: " + parser.name)
                 skip(parser)
             }
         }
         return entries
     }
+
+    // MAKE SURE TO POPULATE POST_ID!!! and feedName
 
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
     // to their respective "read" methods for processing. Otherwise, skips the tag.
@@ -66,21 +76,97 @@ class StackOverflowXmlParser {
     private fun readEntry(parser: XmlPullParser): Item {
         // parser.require(XmlPullParser.START_TAG, ns, "item")
         var title: String? = null
+        var author: String? = null
         var summary: String? = null
         var link: String? = null
+        var postId: Int? = null
+        var timestamp: Long? = 0
+        var content: String? = null
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 continue
             }
-            when (parser.name) {
+            when (simplifyTag(parser.name)) {
+                "id" -> postId = readId(parser)
                 "title" -> title = readTitle(parser)
-                "description" -> summary = readDescription(parser)
+                "author" -> author = readAuthor(parser)
+                // "description" -> summary = readDescription(parser)
                 "link" -> link = readLink(parser)
+                "pubDate" -> timestamp = readTimestamp(parser)
+                "content" -> content = readContent(parser)
                 else -> skip(parser)
             }
         }
-        // return Item(title = title, description = summary)//, link)
-        return Item(itemName = title!!, itemPrice = 0.0, quantityInStock = 0, read = false)//, link)
+
+        // where to get this from? title of site?
+        // should be able to pass it in somehow I think
+        var feedname = "test_feedname"
+
+        var TAG = "PARSER"
+        if (postId != null) {
+            Log.i(TAG, "postId: " + postId!!.toString())
+        } else {
+            Log.i(TAG, "No postId found")
+        }
+
+        if (title != null) {
+            Log.i(TAG, "title: " + title!!)
+        } else {
+            Log.i(TAG, "No title found")
+        }
+
+        if (author != null) {
+            Log.i(TAG, "author: " + author!!)
+        } else {
+            Log.i(TAG, "No author found")
+        }
+
+        if (link != null) {
+            Log.i(TAG, "link: " + link!!)
+        } else {
+            Log.i(TAG, "No link found")
+        }
+
+        if (timestamp != null) {
+            Log.i(TAG, "timestamp: " + timestamp!!.toString())
+        } else {
+            Log.i(TAG, "No timestamp found")
+        }
+
+        if (content != null) {
+            Log.i(TAG, "content: " + content!!.substring(0, 100))
+        } else {
+            Log.i(TAG, "No content found")
+        }
+
+        // Populate postId if still null.
+        if (postId == null) {
+            postId = (title + timestamp.toString()).hashCode()
+        }
+        if (author == null) {
+            author = ""
+        }
+        if (link == null) {
+            link = ""
+        }
+        if (content == null) {
+            content = ""
+        }
+
+//        return Item(postId = postId!!, title = title!!, author = author!!, feedName = feedname,
+//            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
+        return Item(postId = postId!!, title = title!!, author = author!!, feedName = feedname,
+            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
+    }
+
+    private fun simplifyTag(tag: String): String {
+        return when {
+            tag.contains("id") -> "id"
+            tag.contains("creator") -> "author"
+            tag.contains("date") -> "pubDate"
+            tag.contains("content") -> "content"
+            else -> tag
+        }
     }
 
     // Processes title tags in the feed.
@@ -98,10 +184,11 @@ class StackOverflowXmlParser {
         var link = ""
         parser.require(XmlPullParser.START_TAG, ns, "link")
         val tag = parser.name
-        val relType = parser.getAttributeValue(null, "rel")
+        // val relType = parser.getAttributeValue(null, "rel")
         if (tag == "link") {
-            if (relType == "alternate") {
-                link = parser.getAttributeValue(null, "href")
+            val href = parser.getAttributeValue(null, "href")
+            if (href != null) {
+                link = href
                 parser.nextTag()
             } else {
                 link = readText(parser)
@@ -117,11 +204,37 @@ class StackOverflowXmlParser {
 
     // Processes summary tags in the feed.
     @Throws(IOException::class, XmlPullParserException::class)
-    private fun readDescription(parser: XmlPullParser): String {
-        parser.require(XmlPullParser.START_TAG, ns, "description")
-        val summary = readText(parser)
-        parser.require(XmlPullParser.END_TAG, ns, "description")
-        return summary
+    private fun readAuthor(parser: XmlPullParser): String {
+        // parser.require(XmlPullParser.START_TAG, ns, "description")
+        val author = readText(parser)
+        // parser.require(XmlPullParser.END_TAG, ns, "description")
+        return author
+    }
+
+    @Throws(IOException::class, XmlPullParserException::class)
+    private fun readContent(parser: XmlPullParser): String {
+        // parser.require(XmlPullParser.START_TAG, ns, "content")
+        val content = readText(parser)
+        // parser.require(XmlPullParser.END_TAG, ns, "content")
+        return content
+    }
+
+    @Throws(IOException::class, XmlPullParserException::class)
+    private fun readId(parser: XmlPullParser): Int {
+        // parser.require(XmlPullParser.START_TAG, ns, "description")
+        val idText = readText(parser)
+        // parser.require(XmlPullParser.END_TAG, ns, "description")
+        return idText.hashCode()
+    }
+
+    @Throws(IOException::class, XmlPullParserException::class)
+    private fun readTimestamp(parser: XmlPullParser): Long {
+        // parser.require(XmlPullParser.START_TAG, ns, "description")
+        val dateString = readText(parser)
+        val timestamp = parseDate(dateString)
+        // parser.require(XmlPullParser.END_TAG, ns, "description")
+        Log.i("PARSER", "datestring: " + dateString + " -> timestamp: " + timestamp)
+        return timestamp
     }
 
     // For the tags title and summary, extracts their text values.
@@ -142,7 +255,7 @@ class StackOverflowXmlParser {
         }
         var depth = 1
         while (depth != 0) {
-            Log.i(TAG, "in skip: " + parser.name)
+            // Log.i(TAG, "in skip: " + parser.name)
             when (parser.next()) {
                 XmlPullParser.END_TAG -> depth--
                 XmlPullParser.START_TAG -> depth++
@@ -151,15 +264,43 @@ class StackOverflowXmlParser {
     }
 }
 
+fun parseDate(dateString: String): Long {
+    val formats: List<SimpleDateFormat> = listOf(
+        // SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
+        SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
+        // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
+        // 2021-09-20T20:40:59Z
+        // SimpleDateFormat("MM-dd-yyyy"),
+        // SimpleDateFormat("yyyyMMdd"),
+        // SimpleDateFormat("MM/dd/yyyy"),
+    )
+
+    for (format in formats) {
+        try {
+            val parsedDate = format.parse(dateString)
+            return parsedDate.time
+        } catch (e: ParseException) {
+            continue
+        }
+    }
+
+    return -1
+}
+
 class NetworkActivity : Activity() {
 
     companion object {
 
         const val WIFI = "Wi-Fi"
         const val ANY = "Any"
-        // const val SO_URL = "http://stackoverflow.com/feeds/tag?tagnames=android&sort=newest"
-        const val SO_URL = "https://freethoughtblogs.com/feed/"
-        // const val SO_URL = "https://ranprieur.com/feed"
+
+//         const val URL = "http://stackoverflow.com/feeds/tag?tagnames=android&sort=newest"
+//         const val URL = "https://freethoughtblogs.com/feed/"
+//         const val URL = "https://ranprieur.com/feed"
+//         const val URL = "https://pbfcomics.com/feed/"
+         const val URL = "https://www.notechmagazine.com/feed"
+
         // Whether there is a Wi-Fi connection.
         private var wifiConnected = true
         // Whether there is a mobile connection.
@@ -176,16 +317,16 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadPage() {
-        Log.i(TAG, "in LoadPage")
+    fun loadPage(viewModel: InventoryViewModel) {
+        // Log.i(TAG, "in LoadPage")
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
-            Log.i(TAG, "running 1st one")
-            loadXmlFromNetwork(SO_URL)
-            // DownloadXmlTask().execute(SO_URL)
+            // Log.i(TAG, "running 1st one")
+            loadXmlFromNetwork(URL, viewModel)
+            // DownloadXmlTask().execute(URL)
         } else if (sPref.equals(WIFI) && wifiConnected) {
-            Log.i(TAG, "running 2nd one")
-            loadXmlFromNetwork(SO_URL)
-            // DownloadXmlTask().execute(SO_URL)
+            // Log.i(TAG, "running 2nd one")
+            loadXmlFromNetwork(URL, viewModel)
+            // DownloadXmlTask().execute(URL)
         } else {
             // show error
             Log.i(TAG, "didn't do any of them")
@@ -250,7 +391,7 @@ class NetworkActivity : Activity() {
 //        }.toString()
 //    }
 
-    private fun loadXmlFromNetwork(urlString: String) {
+    private fun loadXmlFromNetwork(urlString: String, viewModel: InventoryViewModel) {
         GlobalScope.launch(Dispatchers.IO) {
             val entries: List<Item> = downloadUrl(urlString)?.use { stream ->
                 // Instantiate the parser
@@ -263,10 +404,11 @@ class NetworkActivity : Activity() {
             for (entry in entries) {
 
                 // Log.i(TAG, entry.title + " ... " + entry.description)// + " ... " + entry.link)
-                Log.i(TAG, entry.itemName)
+                Log.i(TAG, entry.title)
                 // blah
 
                 // adapter.addItem(entry)
+                viewModel.addNewItem(entry)
             }
 //            runOnUiThread {
 //                adapter.notifyDataSetChanged()

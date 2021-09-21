@@ -76,11 +76,11 @@ class AddItemFragment : Fragment() {
      * Binds views with the passed in [item] information.
      */
     private fun bind(item: Item) {
-        val price = "%.2f".format(item.itemPrice)
+        // val price = "%.2f".format(item.itemPrice)
         binding.apply {
-            itemName.setText(item.itemName, TextView.BufferType.SPANNABLE)
-            itemPrice.setText(price, TextView.BufferType.SPANNABLE)
-            itemCount.setText(item.quantityInStock.toString(), TextView.BufferType.SPANNABLE)
+            itemName.setText(item.title, TextView.BufferType.SPANNABLE)
+//            itemPrice.setText(price, TextView.BufferType.SPANNABLE)
+//            itemCount.setText(item.quantityInStock.toString(), TextView.BufferType.SPANNABLE)
             saveAction.setOnClickListener { updateItem() }
         }
     }
@@ -90,11 +90,11 @@ class AddItemFragment : Fragment() {
      */
     private fun addNewItem() {
         if (isEntryValid()) {
-            viewModel.addNewItem(
-                binding.itemName.text.toString(),
-                binding.itemPrice.text.toString(),
-                binding.itemCount.text.toString(),
-            )
+//            viewModel.addNewItem(
+//                binding.itemName.text.toString(),
+//                binding.itemPrice.text.toString(),
+//                binding.itemCount.text.toString(),
+//            )
             val action = AddItemFragmentDirections.actionAddItemFragmentToItemListFragment()
             findNavController().navigate(action)
         }
@@ -105,13 +105,13 @@ class AddItemFragment : Fragment() {
      */
     private fun updateItem() {
         if (isEntryValid()) {
-            viewModel.updateItem(
-                this.navigationArgs.itemId,
-                this.binding.itemName.text.toString(),
-                this.binding.itemPrice.text.toString(),
-                this.binding.itemCount.text.toString(),
-                // false,
-            )
+//            viewModel.updateItem(
+//                this.navigationArgs.itemId,
+//                this.binding.itemName.text.toString(),
+//                this.binding.itemPrice.text.toString(),
+//                this.binding.itemCount.text.toString(),
+//                // false,
+//            )
             val action = AddItemFragmentDirections.actionAddItemFragmentToItemListFragment()
             findNavController().navigate(action)
         }
@@ -126,17 +126,17 @@ class AddItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val id = navigationArgs.itemId
-        if (id > 0) {
-            viewModel.retrieveItem(id).observe(this.viewLifecycleOwner) { selectedItem ->
-                item = selectedItem
-                bind(item)
-            }
-        } else {
-            binding.saveAction.setOnClickListener {
-                addNewItem()
-            }
-        }
+//        val postId = navigationArgs.postId
+//        if (id > 0) {
+//            viewModel.retrieveItem(id).observe(this.viewLifecycleOwner) { selectedItem ->
+//                item = selectedItem
+//                bind(item)
+//            }
+//        } else {
+//            binding.saveAction.setOnClickListener {
+//                addNewItem()
+//            }
+//        }
     }
 
     /**

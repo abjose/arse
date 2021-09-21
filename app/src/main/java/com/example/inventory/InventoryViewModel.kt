@@ -35,25 +35,25 @@ class InventoryViewModel(private val itemDao: ItemDao) : ViewModel() {
     val allItems: LiveData<List<Item>> = itemDao.getItems().asLiveData()
     val unreadItems: LiveData<List<Item>> = itemDao.getUnreadItems().asLiveData()
 
-    /**
-     * Returns true if stock is available to sell, false otherwise.
-     */
-    fun isStockAvailable(item: Item): Boolean {
-        return (item.quantityInStock > 0)
-    }
+//    /**
+//     * Returns true if stock is available to sell, false otherwise.
+//     */
+//    fun isStockAvailable(item: Item): Boolean {
+//        return (item.quantityInStock > 0)
+//    }
 
-    /**
-     * Updates an existing Item in the database.
-     */
-    fun updateItem(
-        itemId: Int,
-        itemName: String,
-        itemPrice: String,
-        itemCount: String
-    ) {
-        val updatedItem = getUpdatedItemEntry(itemId, itemName, itemPrice, itemCount)
-        updateItem(updatedItem)
-    }
+//    /**
+//     * Updates an existing Item in the database.
+//     */
+//    fun updateItem(
+//        itemId: Int,
+//        itemName: String,
+//        itemPrice: String,
+//        itemCount: String
+//    ) {
+//        val updatedItem = getUpdatedItemEntry(itemId, itemName, itemPrice, itemCount)
+//        updateItem(updatedItem)
+//    }
 
 
     /**
@@ -65,21 +65,21 @@ class InventoryViewModel(private val itemDao: ItemDao) : ViewModel() {
         }
     }
 
-    /**
-     * Decreases the stock by one unit and updates the database.
-     */
-    fun sellItem(item: Item) {
-        if (item.quantityInStock > 0) {
-            // Decrease the quantity by 1
-            val newItem = item.copy(quantityInStock = item.quantityInStock - 1)
-            updateItem(newItem)
-        }
-    }
+//    /**
+//     * Decreases the stock by one unit and updates the database.
+//     */
+//    fun sellItem(item: Item) {
+//        if (item.quantityInStock > 0) {
+//            // Decrease the quantity by 1
+//            val newItem = item.copy(quantityInStock = item.quantityInStock - 1)
+//            updateItem(newItem)
+//        }
+//    }
 
     // fun markItemRead(item: Item) {
-    fun markItemRead(id: Int) {
+    fun markItemRead(postId: Int, feedName: String) {
         viewModelScope.launch {
-            itemDao.markRead(id)
+            itemDao.markRead(postId, feedName)
         }
 //        // val item = itemDao.getItem(id)
 //        val item = retrieveItem(id)
@@ -96,9 +96,13 @@ class InventoryViewModel(private val itemDao: ItemDao) : ViewModel() {
     /**
      * Inserts the new Item into database.
      */
-    fun addNewItem(itemName: String, itemPrice: String, itemCount: String) {
-        val newItem = getNewItemEntry(itemName, itemPrice, itemCount)
+    fun addNewItem(postId: Int, title: String, author: String, feedName: String, link: String, timestamp: Long, content: String) {
+        val newItem = getNewItemEntry(postId, title, author, feedName, link, timestamp, content)
         insertItem(newItem)
+    }
+    fun addNewItem(item: Item) {
+        // Will ignore if have matching (feed name + post ID) entity
+        insertItem(item)
     }
 
     /**
@@ -122,8 +126,8 @@ class InventoryViewModel(private val itemDao: ItemDao) : ViewModel() {
     /**
      * Retrieve an item from the repository.
      */
-    fun retrieveItem(id: Int): LiveData<Item> {
-        return itemDao.getItem(id).asLiveData()
+    fun retrieveItem(postId: Int, feedName: String): LiveData<Item> {
+        return itemDao.getItem(postId, feedName).asLiveData()
     }
 
     /**
@@ -140,34 +144,38 @@ class InventoryViewModel(private val itemDao: ItemDao) : ViewModel() {
      * Returns an instance of the [Item] entity class with the item info entered by the user.
      * This will be used to add a new entry to the Inventory database.
      */
-    private fun getNewItemEntry(itemName: String, itemPrice: String, itemCount: String): Item {
+    private fun getNewItemEntry(postId: Int, title: String, author: String, feedName: String, link: String, timestamp: Long, content: String): Item {
         return Item(
-            itemName = itemName,
-            itemPrice = itemPrice.toDouble(),
-            quantityInStock = itemCount.toInt(),
+            postId = postId,
+            title = title,
+            author = author,
+            feedName = feedName,
+            link = link,
+            timestamp = timestamp,
+            content = content,
             read = false
         )
     }
 
-    /**
-     * Called to update an existing entry in the Inventory database.
-     * Returns an instance of the [Item] entity class with the item info updated by the user.
-     */
-    private fun getUpdatedItemEntry(
-        itemId: Int,
-        itemName: String,
-        itemPrice: String,
-        itemCount: String,
-        // read: Boolean,
-    ): Item {
-        return Item(
-            id = itemId,
-            itemName = itemName,
-            itemPrice = itemPrice.toDouble(),
-            quantityInStock = itemCount.toInt(),
-            read = false,
-        )
-    }
+//    /**
+//     * Called to update an existing entry in the Inventory database.
+//     * Returns an instance of the [Item] entity class with the item info updated by the user.
+//     */
+//    private fun getUpdatedItemEntry(
+//        itemId: Int,
+//        itemName: String,
+//        itemPrice: String,
+//        itemCount: String,
+//        // read: Boolean,
+//    ): Item {
+//        return Item(
+//            id = itemId,
+//            itemName = itemName,
+//            itemPrice = itemPrice.toDouble(),
+//            quantityInStock = itemCount.toInt(),
+//            read = false,
+//        )
+//    }
 }
 
 /**

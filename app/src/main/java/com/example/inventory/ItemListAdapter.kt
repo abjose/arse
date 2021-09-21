@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inventory.data.Item
-import com.example.inventory.data.getFormattedPrice
 import com.example.inventory.databinding.ItemListItemBinding
 
 /**
@@ -47,16 +46,17 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
             onItemClicked(current, position)
         }
         holder.bind(current)
-        holder.itemView.setTag(current.id)
+        holder.itemView.setTag("postId".hashCode(), current.postId)
+        holder.itemView.setTag("feedName".hashCode(), current.feedName)
     }
 
     class ItemViewHolder(private var binding: ItemListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Item) {
-            binding.itemName.text = item.itemName
-            binding.itemPrice.text = item.getFormattedPrice()
-            binding.itemQuantity.text = item.quantityInStock.toString()
+            binding.itemName.text = item.title
+//            binding.itemPrice.text = item.getFormattedPrice()
+//            binding.itemQuantity.text = item.quantityInStock.toString()
         }
     }
 
@@ -67,7 +67,7 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
             }
 
             override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
-                return oldItem.itemName == newItem.itemName
+                return oldItem.postId == newItem.postId
             }
         }
     }

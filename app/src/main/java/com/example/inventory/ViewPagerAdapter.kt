@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inventory.data.Item
-import com.example.inventory.data.getFormattedPrice
 // import com.example.inventory.databinding.FragmentItemDetailBinding
 import com.example.inventory.databinding.PagerDetailBinding
 import com.example.inventory.databinding.ItemListItemBinding
@@ -36,8 +35,8 @@ class ViewPagerAdapter(): ListAdapter<Item, ViewPagerAdapter.ItemDetailViewHolde
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Item) {
-            binding.itemName.text = item.itemName
-            binding.itemPrice.text = item.getFormattedPrice()
+            binding.itemName.text = item.title
+            // binding.itemPrice.text = item.getFormattedPrice()
             // binding.itemQuantity.text = item.quantityInStock.toString()
         }
     }
@@ -49,7 +48,7 @@ class ViewPagerAdapter(): ListAdapter<Item, ViewPagerAdapter.ItemDetailViewHolde
             }
 
             override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
-                return oldItem.itemName == newItem.itemName
+                return oldItem.postId == newItem.postId
             }
         }
     }

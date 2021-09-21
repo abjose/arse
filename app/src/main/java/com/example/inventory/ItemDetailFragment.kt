@@ -25,7 +25,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.inventory.data.Item
-import com.example.inventory.data.getFormattedPrice
 import com.example.inventory.databinding.FragmentItemDetailBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -59,11 +58,11 @@ class ItemDetailFragment : Fragment() {
      */
     private fun bind(item: Item) {
         binding.apply {
-            itemName.text = item.itemName
-            itemPrice.text = item.getFormattedPrice()
-            itemCount.text = item.quantityInStock.toString()
-            sellItem.isEnabled = viewModel.isStockAvailable(item)
-            sellItem.setOnClickListener { viewModel.sellItem(item) }
+            itemName.text = item.title
+//            itemPrice.text = item.getFormattedPrice()
+//            itemCount.text = item.quantityInStock.toString()
+//            sellItem.isEnabled = viewModel.isStockAvailable(item)
+//            sellItem.setOnClickListener { viewModel.sellItem(item) }
             deleteItem.setOnClickListener { showConfirmationDialog() }
             editItem.setOnClickListener { editItem() }
         }
@@ -73,11 +72,11 @@ class ItemDetailFragment : Fragment() {
      * Navigate to the Edit item screen.
      */
     private fun editItem() {
-        val action = ItemDetailFragmentDirections.actionItemDetailFragmentToAddItemFragment(
-            getString(R.string.edit_fragment_title),
-            item.id
-        )
-        this.findNavController().navigate(action)
+//        val action = ItemDetailFragmentDirections.actionItemDetailFragmentToAddItemFragment(
+//            getString(R.string.edit_fragment_title),
+//            item.id
+//        )
+//        this.findNavController().navigate(action)
     }
 
     /**
@@ -105,11 +104,12 @@ class ItemDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val id = navigationArgs.itemId
+        val postId = navigationArgs.postId
+        val feedName = navigationArgs.feedName
         // Retrieve the item details using the itemId.
         // Attach an observer on the data (instead of polling for changes) and only update the
         // the UI when the data actually changes.
-        viewModel.retrieveItem(id).observe(this.viewLifecycleOwner) { selectedItem ->
+        viewModel.retrieveItem(postId, feedName).observe(this.viewLifecycleOwner) { selectedItem ->
             item = selectedItem
             bind(item)
         }

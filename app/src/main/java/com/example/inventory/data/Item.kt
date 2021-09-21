@@ -19,26 +19,39 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.text.NumberFormat
+import java.time.LocalDateTime
 
 /**
  * Entity data class represents a single row in the database.
  */
-@Entity
+@Entity(primaryKeys=["feed_name", "post_id"])
 data class Item(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    @ColumnInfo(name = "name")
-    val itemName: String,
-    @ColumnInfo(name = "price")
-    val itemPrice: Double,
-    @ColumnInfo(name = "quantity")
-    val quantityInStock: Int,
+    // @PrimaryKey(autoGenerate = true)
+    // val id: Int = 0,
+
+    // TODO: change this to a foreign key into Feeds db
+    @ColumnInfo(name = "feed_name")
+    val feedName: String,
+    @ColumnInfo(name = "post_id")
+    val postId: Int,
+
+    @ColumnInfo(name = "title")
+    val title: String,
+    @ColumnInfo(name = "author")
+    val author: String,
+    @ColumnInfo(name = "link")
+    val link: String,
+    @ColumnInfo(name = "timestamp")
+    val timestamp: Long,
+    @ColumnInfo(name = "content")
+    val content: String,
 
     @ColumnInfo(name = "read")
     val read: Boolean,
 )
-/**
- * Returns the passed in price in currency format.
- */
-fun Item.getFormattedPrice(): String =
-    NumberFormat.getCurrencyInstance().format(itemPrice)
+
+///**
+// * Returns the passed in price in currency format.
+// */
+//fun Item.getFormattedPrice(): String =
+//    NumberFormat.getCurrencyInstance().format(itemPrice)

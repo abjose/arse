@@ -29,21 +29,21 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ItemDao {
 
-    @Query("SELECT * from item ORDER BY name ASC")
+    @Query("SELECT * from item ORDER BY timestamp ASC")
     fun getItems(): Flow<List<Item>>
 
-    @Query("SELECT * from item WHERE read = 0 ORDER BY name ASC")
+    @Query("SELECT * from item WHERE read = 0 ORDER BY timestamp ASC")
     fun getUnreadItems(): Flow<List<Item>>
 
-    @Query("SELECT * from item WHERE id = :id")
-    fun getItem(id: Int): Flow<Item>
+    @Query("SELECT * from item WHERE post_id = :postId AND feed_name = :feedName")
+    fun getItem(postId: Int, feedName: String): Flow<Item>
 
 //    @Query("SELECT * from item WHERE id = :id")
 //    fun getItemBlah(id: Int): Item
 
     // uhh
-    @Query("UPDATE item SET read = 1 WHERE id = :id")
-    suspend fun markRead(id: Int)
+    @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_name = :feedName")
+    suspend fun markRead(postId: Int, feedName: String)
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.

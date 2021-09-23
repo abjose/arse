@@ -107,8 +107,11 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         // Will ignore if have matching (feed name + post ID) entity
         insertItem(item)
     }
+    fun addNewFeed(feed: Feed) {
+        insertFeed(feed)
+    }
     fun addNewFeed(url: String, name: String, category: String) {
-        val newFeed = getNewFeedEntry(url, name, category)
+        val newFeed = getNewFeedEntry(url, name, "todo", category)
         insertFeed(newFeed)
     }
 
@@ -182,10 +185,11 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
             read = false
         )
     }
-    private fun getNewFeedEntry(url: String, name: String, category: String): Feed {
+    private fun getNewFeedEntry(url: String, name: String, htmlUrl: String, category: String): Feed {
         return Feed(
             url = url,
             name = name,
+            htmlUrl = htmlUrl,
             category = category
         )
     }

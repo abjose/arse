@@ -48,7 +48,8 @@ class ViewPagerAdapter(): ListAdapter<Item, ViewPagerAdapter.ItemDetailViewHolde
             }
 
             override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
-                return oldItem.postId == newItem.postId && oldItem.feedUrl == newItem.feedUrl
+                // return oldItem.postId == newItem.postId && oldItem.feedUrl == newItem.feedUrl
+                return oldItem.postId == newItem.postId
             }
         }
     }

@@ -63,6 +63,8 @@ dependencies {
     implementation "com.google.android.material:material:$material_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation "androidx.recyclerview:recyclerview:1.2.0-alpha02"
 
     // Lifecycle libraries
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
@@ -74,7 +76,6 @@ dependencies {
 
     // Room libraries
     implementation "androidx.room:room-runtime:$room_version"
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 }

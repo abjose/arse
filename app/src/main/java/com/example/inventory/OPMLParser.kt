@@ -2,6 +2,7 @@ package com.example.inventory
 
 import android.app.Activity
 import android.util.Log
+import com.example.inventory.data.Feed
 import com.example.inventory.data.Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -19,15 +20,14 @@ import java.util.*
 // We don't use namespaces
 private val ns: String? = null
 
-// Likely a good reference:
-// https://github.com/prof18/RSS-Parser/blob/master/rssparser/src/main/java/com/prof/rssparser/core/CoreXMLParser.kt
+class OPMLParser() {
+    var TAG = "OPMLParser"
 
-// Probably better way to pass in url?
-class FeedParser(private val urlString: String) {
-    var TAG = "StackOverflowXmlParser"
+    private var category: String? = null
 
     @Throws(XmlPullParserException::class, IOException::class)
-    fun parse(inputStream: InputStream): List<Item> {
+    fun parse(inputStream: InputStream): List<Feed> {
+        // Log.i(TAG, "i wanna parse")
         inputStream.use { inputStream ->
             // val parser: XmlPullParser = Xml.newPullParser()
             val parserFactory = XmlPullParserFactory.newInstance()
@@ -36,144 +36,68 @@ class FeedParser(private val urlString: String) {
             parser.setInput(inputStream, null)
             //parser.setInput(inputStream, "utf-8")
             parser.nextTag()
-            return readFeed(parser)
+            return readOPML(parser)
         }
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readFeed(parser: XmlPullParser): List<Item> {
-        val entries = mutableListOf<Item>()
+    private fun readOPML(parser: XmlPullParser): List<Feed> {
+        val feeds = mutableListOf<Feed>()
 
         // parser.require(XmlPullParser.START_TAG, ns, "feed")
-        while (parser.next() != XmlPullParser.END_TAG) {
+        // while (parser.next() != XmlPullParser.END_TAG) {
+        // var eventType = parser.eventType
+        // while (eventType != XmlPullParser.END_DOCUMENT) {
+        while (parser.eventType != XmlPullParser.END_DOCUMENT) {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 // Log.i(TAG, "continuing, eventType: " + parser.eventType)
-                continue
-            }
-            // Starts by looking for the entry tag
-            // if (parser.name == "entry") {
-            if (parser.name == "channel") {
-                // Log.i(TAG, "channel; continuing")
                 parser.next()
-            } else if (parser.name == "item" || parser.name == "entry") {
-                // Log.i(TAG, "reading item/entry")
-                entries.add(readEntry(parser))
+            } else if (parser.name == "body" || parser.name == "opml") {
+                // Log.i(TAG, "body")
+                parser.nextTag()
+            } else if (parser.name == "outline") {
+                // Log.i(TAG, "reading outline")
+                val maybeFeed: Feed? = readOutline(parser)
+                if (maybeFeed != null) {
+                    feeds.add(maybeFeed)
+                }
+                parser.nextTag()
             } else {
                 // Log.i(TAG, "skipping, name: " + parser.name)
                 skip(parser)
             }
         }
-        return entries
+        return feeds
     }
-
-    // MAKE SURE TO POPULATE POST_ID!!! and feedName
 
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
     // to their respective "read" methods for processing. Otherwise, skips the tag.
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readEntry(parser: XmlPullParser): Item {
-        // parser.require(XmlPullParser.START_TAG, ns, "item")
-        var title: String? = null
-        var author: String? = null
-        var summary: String? = null
-        var link: String? = null
-        var postId: Int? = null
-        var timestamp: Long? = 0
-        var content: String? = null
-        while (parser.next() != XmlPullParser.END_TAG) {
-            if (parser.eventType != XmlPullParser.START_TAG) {
-                continue
-            }
-            when (simplifyTag(parser.name)) {
-                "id" -> postId = readId(parser)
-                "title" -> title = readTitle(parser)
-                "author" -> author = readAuthor(parser)
-                // "description" -> summary = readDescription(parser)
-                "link" -> link = readLink(parser)
-                "pubDate" -> timestamp = readTimestamp(parser)
-                "content" -> content = readContent(parser)
-                else -> skip(parser)
-            }
+    private fun readOutline(parser: XmlPullParser): Feed? {
+        parser.require(XmlPullParser.START_TAG, ns, "outline")
+
+        val url = parser.getAttributeValue(null, "xmlUrl")
+        if (url == null) {
+            // This is probably a category - for now, only allow one level of hierarchy.
+            category = parser.getAttributeValue(null, "text")
+            // Log.i("OPMLParser", "category: $category")
+            return null
         }
 
-        // where to get this from? title of site?
-        // should be able to pass it in somehow I think
-
-        var TAG = "PARSER"
-        if (postId != null) {
-            Log.i(TAG, "postId: " + postId!!.toString())
-        } else {
-            Log.i(TAG, "No postId found")
+        // Otherwise, this is a child node / actual feed.
+        val name = parser.getAttributeValue(null, "text")
+        var htmlUrl = parser.getAttributeValue(null, "htmlUrl")
+        if (htmlUrl == null) {
+            htmlUrl = ""
         }
-
-        if (title != null) {
-            Log.i(TAG, "title: " + title!!)
-        } else {
-            Log.i(TAG, "No title found")
+        if (category != null) {
+            // Log.i("OPMLParser", "Adding feed: $url, $name, $category")
+            return Feed(url, name, htmlUrl, category as String)
         }
-
-        if (author != null) {
-            Log.i(TAG, "author: " + author!!)
-        } else {
-            Log.i(TAG, "No author found")
-        }
-
-        if (link != null) {
-            Log.i(TAG, "link: " + link!!)
-        } else {
-            Log.i(TAG, "No link found")
-        }
-
-        if (timestamp != null) {
-            Log.i(TAG, "timestamp: " + timestamp!!.toString())
-        } else {
-            Log.i(TAG, "No timestamp found")
-        }
-
-        if (content != null) {
-            Log.i(TAG, "content: " + content!!.substring(0, 100))
-        } else {
-            Log.i(TAG, "No content found")
-        }
-
-        // Populate postId if still null.
-        if (postId == null) {
-            postId = (title + timestamp.toString()).hashCode()
-        }
-        if (author == null) {
-            author = ""
-        }
-        if (link == null) {
-            link = ""
-        }
-        if (content == null) {
-            content = ""
-        }
-
-//        return Item(postId = postId!!, title = title!!, author = author!!, feedName = feedname,
-//            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
-        return Item(feedUrl = urlString, postId = postId!!, title = title!!, author = author!!,
-            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
+        // parser.require(XmlPullParser.END_TAG, ns, "content")
+        return Feed(url, name, htmlUrl, "Uncategorized")
     }
 
-    private fun simplifyTag(tag: String): String {
-        return when {
-            tag.contains("id") -> "id"
-            tag.contains("creator") -> "author"
-            tag.contains("date") -> "pubDate"
-            tag.contains("content") -> "content"
-            else -> tag
-        }
-    }
-
-    // Processes title tags in the feed.
-    @Throws(IOException::class, XmlPullParserException::class)
-    private fun readTitle(parser: XmlPullParser): String {
-        parser.require(XmlPullParser.START_TAG, ns, "title")
-        val title = readText(parser)
-        parser.require(XmlPullParser.END_TAG, ns, "title")
-        return title
-    }
 
     // Processes link tags in the feed.
     @Throws(IOException::class, XmlPullParserException::class)
@@ -197,41 +121,6 @@ class FeedParser(private val urlString: String) {
         }
         parser.require(XmlPullParser.END_TAG, ns, "link")
         return link
-    }
-
-    // Processes summary tags in the feed.
-    @Throws(IOException::class, XmlPullParserException::class)
-    private fun readAuthor(parser: XmlPullParser): String {
-        // parser.require(XmlPullParser.START_TAG, ns, "description")
-        val author = readText(parser)
-        // parser.require(XmlPullParser.END_TAG, ns, "description")
-        return author
-    }
-
-    @Throws(IOException::class, XmlPullParserException::class)
-    private fun readContent(parser: XmlPullParser): String {
-        // parser.require(XmlPullParser.START_TAG, ns, "content")
-        val content = readText(parser)
-        // parser.require(XmlPullParser.END_TAG, ns, "content")
-        return content
-    }
-
-    @Throws(IOException::class, XmlPullParserException::class)
-    private fun readId(parser: XmlPullParser): Int {
-        // parser.require(XmlPullParser.START_TAG, ns, "description")
-        val idText = readText(parser)
-        // parser.require(XmlPullParser.END_TAG, ns, "description")
-        return idText.hashCode()
-    }
-
-    @Throws(IOException::class, XmlPullParserException::class)
-    private fun readTimestamp(parser: XmlPullParser): Long {
-        // parser.require(XmlPullParser.START_TAG, ns, "description")
-        val dateString = readText(parser)
-        val timestamp = parseDate(dateString)
-        // parser.require(XmlPullParser.END_TAG, ns, "description")
-        Log.i("PARSER", "datestring: " + dateString + " -> timestamp: " + timestamp)
-        return timestamp
     }
 
     // For the tags title and summary, extracts their text values.
@@ -261,31 +150,7 @@ class FeedParser(private val urlString: String) {
     }
 }
 
-fun parseDate(dateString: String): Long {
-    val formats: List<SimpleDateFormat> = listOf(
-        // SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
-        SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
-        // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
-        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
-        // 2021-09-20T20:40:59Z
-        // SimpleDateFormat("MM-dd-yyyy"),
-        // SimpleDateFormat("yyyyMMdd"),
-        // SimpleDateFormat("MM/dd/yyyy"),
-    )
-
-    for (format in formats) {
-        try {
-            val parsedDate = format.parse(dateString)
-            return parsedDate.time
-        } catch (e: ParseException) {
-            continue
-        }
-    }
-
-    return -1
-}
-
-class BlahActivity : Activity() {
+class NetworkActivity : Activity() {
 
     companion object {
 

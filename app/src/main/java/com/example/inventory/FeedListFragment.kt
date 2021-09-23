@@ -16,6 +16,8 @@
 
 package com.example.inventory
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -170,8 +172,27 @@ class FeedListFragment : Fragment() {
         }
 
         binding.floatingActionButton.setOnClickListener {
-            val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment("")
-            this.findNavController().navigate(action)
+//            val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment("")
+//            this.findNavController().navigate(action)
+
+            val intent = Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT)
+            startActivityForResult(Intent.createChooser(intent, "Select a file"), 111)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 111 && resultCode == RESULT_OK) {
+            val uri = data?.data //The uri with the location of the file
+            Log.i("Activity", "got da data, uri: " + uri.toString())
+            if (uri != null) {
+                val inputStream = requireContext().contentResolver.openInputStream(uri);
+                val feeds = OPMLParser().parse(inputStream!!)
+                for (feed in feeds) {
+                    viewModel.addNewFeed(feed)
+                }
+            }
         }
     }
 }

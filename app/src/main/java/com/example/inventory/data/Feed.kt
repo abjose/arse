@@ -31,6 +31,8 @@ data class Feed(
     @ColumnInfo(name = "name")
     val name: String,
 
+    @ColumnInfo(name = "html_url")
+    val htmlUrl: String,
     // TODO: switch to a more relational way of storing tags?
     @ColumnInfo(name = "category")
     val category: String,

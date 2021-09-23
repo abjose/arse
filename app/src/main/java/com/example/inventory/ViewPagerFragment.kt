@@ -60,6 +60,7 @@ class ViewPagerFragment : Fragment() {
 
         // val id = navigationArgs.itemId
         val position = navigationArgs.itemPosition
+        Log.i("ViewPager", "position: $position")
 
 //        // Retrieve the item details using the itemId.
 //        // Attach an observer on the data (instead of polling for changes) and only update the
@@ -85,9 +86,12 @@ class ViewPagerFragment : Fragment() {
         }
 
         // Must be a better way to do this - can see it flash to a different view at first.
-        binding.viewPager.post {
+//        binding.viewPager.post {
+//            binding.viewPager.setCurrentItem(position, false)
+//        }
+        binding.viewPager.postDelayed({
             binding.viewPager.setCurrentItem(position, false)
-        }
+        }, 50)  // bleh
 
 //        binding.floatingActionButton.setOnClickListener {
 //            val action = ItemListFragmentDirections.actionItemListFragmentToAddItemFragment(

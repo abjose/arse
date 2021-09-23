@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,13 +41,15 @@ import kotlinx.android.synthetic.main.item_list_fragment.*
 class ItemListFragment : Fragment() {
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao()
+            (activity?.application as InventoryApplication).database.itemDao(),
+            (activity?.application as InventoryApplication).database.feedDao()
         )
     }
 
     private var _binding: ItemListFragmentBinding? = null
     private val binding get() = _binding!!
     private val na = NetworkActivity()
+    private val navigationArgs: ItemListFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,8 +65,7 @@ class ItemListFragment : Fragment() {
 
         // RecyclerView
         val adapter = ItemListAdapter { item: Item, position: Int ->
-            // val action = ItemListFragmentDirections.actionItemListFragmentToItemDetailFragment(it.id)
-            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(item.postId, item.feedName, position)
+            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedUrl)
             this.findNavController().navigate(action)
         }
         binding.recyclerView.layoutManager = LinearLayoutManager(this.context)
@@ -83,13 +85,9 @@ class ItemListFragment : Fragment() {
                     adapter.onItemDismiss(viewHolder.adapterPosition)
 
                     val postId = viewHolder.itemView.getTag("postId".hashCode()) as Int
-                    val feedName = viewHolder.itemView.getTag("feedName".hashCode()) as String
-                    Log.v("SWIPED", postId.toString() + ", " + feedName);
-                    viewModel.markItemRead(postId, feedName)
-
-                    // testRss()
-                    // testDB()
-                    // testXML()
+                    val feedUrl = viewHolder.itemView.getTag("feedUrl".hashCode()) as String
+                    Log.v("SWIPED", postId.toString() + ", " + feedUrl);
+                    viewModel.markItemRead(postId, feedUrl)
                 }
             }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
@@ -100,7 +98,7 @@ class ItemListFragment : Fragment() {
             Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout")
 
             // myUpdateOperation()
-            na.loadPage(viewModel)
+            na.loadPage(viewModel, navigationArgs.feedUrl)
 
             swipe_refresh.isRefreshing = false
         }
@@ -108,7 +106,8 @@ class ItemListFragment : Fragment() {
         // Attach an observer on the allItems list to update the UI automatically when the data
         // changes.
         // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
-        viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
+        // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
+        viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedUrl).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)
             }

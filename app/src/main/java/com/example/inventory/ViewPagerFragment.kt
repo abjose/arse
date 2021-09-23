@@ -37,7 +37,8 @@ import com.example.inventory.databinding.ItemPagerBinding
 class ViewPagerFragment : Fragment() {
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao()
+            (activity?.application as InventoryApplication).database.itemDao(),
+            (activity?.application as InventoryApplication).database.feedDao()
         )
     }
 
@@ -75,7 +76,8 @@ class ViewPagerFragment : Fragment() {
         // Attach an observer on the allItems list to update the UI automatically when the data
         // changes.
         // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
-        viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
+        // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
+        viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedUrl).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)
                 // viewpager_adapter.submitList(it)

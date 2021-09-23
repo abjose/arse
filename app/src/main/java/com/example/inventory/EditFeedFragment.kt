@@ -26,13 +26,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.inventory.data.Feed
 import com.example.inventory.data.Item
 import com.example.inventory.databinding.FragmentAddItemBinding
+import com.example.inventory.databinding.FragmentEditFeedBinding
 
 /**
- * Fragment to add or update an item in the Inventory database.
+ * Fragment to add or update a feed in the Inventory database.
  */
-class AddItemFragment : Fragment() {
+class EditFeedFragment : Fragment() {
 
     // Use the 'by activityViewModels()' Kotlin property delegate from the fragment-ktx artifact
     // to share the ViewModel across fragments.
@@ -42,14 +44,14 @@ class AddItemFragment : Fragment() {
             (activity?.application as InventoryApplication).database.feedDao(),
         )
     }
-    private val navigationArgs: ItemDetailFragmentArgs by navArgs()
+    private val navigationArgs: EditFeedFragmentArgs by navArgs()
 
-    lateinit var item: Item
+    lateinit var feed: Feed
 
     // Binding object instance corresponding to the fragment_add_item.xml layout
     // This property is non-null between the onCreateView() and onDestroyView() lifecycle callbacks,
     // when the view hierarchy is attached to the fragment
-    private var _binding: FragmentAddItemBinding? = null
+    private var _binding: FragmentEditFeedBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -57,7 +59,7 @@ class AddItemFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentAddItemBinding.inflate(inflater, container, false)
+        _binding = FragmentEditFeedBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -65,22 +67,21 @@ class AddItemFragment : Fragment() {
      * Returns true if the EditTexts are not empty
      */
     private fun isEntryValid(): Boolean {
-        return viewModel.isEntryValid(
-            binding.itemName.text.toString(),
-            binding.itemPrice.text.toString(),
-            binding.itemCount.text.toString(),
+        return viewModel.isFeedEntryValid(
+            binding.feedUrl.text.toString(),
+            binding.feedName.text.toString(),
+            binding.category.text.toString(),
         )
     }
 
     /**
      * Binds views with the passed in [item] information.
      */
-    private fun bind(item: Item) {
-        // val price = "%.2f".format(item.itemPrice)
+    private fun bind(feed: Feed) {
         binding.apply {
-            itemName.setText(item.title, TextView.BufferType.SPANNABLE)
-//            itemPrice.setText(price, TextView.BufferType.SPANNABLE)
-//            itemCount.setText(item.quantityInStock.toString(), TextView.BufferType.SPANNABLE)
+            feedUrl.setText(feed.url, TextView.BufferType.SPANNABLE)
+            feedName.setText(feed.name, TextView.BufferType.SPANNABLE)
+            category.setText(feed.category, TextView.BufferType.SPANNABLE)
             saveAction.setOnClickListener { updateItem() }
         }
     }
@@ -89,15 +90,15 @@ class AddItemFragment : Fragment() {
      * Inserts the new Item into database and navigates up to list fragment.
      */
     private fun addNewItem() {
-//        if (isEntryValid()) {
-////            viewModel.addNewItem(
-////                binding.itemName.text.toString(),
-////                binding.itemPrice.text.toString(),
-////                binding.itemCount.text.toString(),
-////            )
-//            val action = AddItemFragmentDirections.actionAddItemFragmentToItemListFragment()
-//            findNavController().navigate(action)
-//        }
+        if (isEntryValid()) {
+            viewModel.addNewFeed(
+                binding.feedUrl.text.toString(),
+                binding.feedName.text.toString(),
+                binding.category.text.toString(),
+            )
+            val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
+            findNavController().navigate(action)
+        }
     }
 
     /**
@@ -126,17 +127,17 @@ class AddItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        val postId = navigationArgs.postId
-//        if (id > 0) {
-//            viewModel.retrieveItem(id).observe(this.viewLifecycleOwner) { selectedItem ->
-//                item = selectedItem
-//                bind(item)
-//            }
-//        } else {
-//            binding.saveAction.setOnClickListener {
-//                addNewItem()
-//            }
-//        }
+        val url = navigationArgs.feedUrl
+        if (url.isNotEmpty()) {
+            viewModel.retrieveFeed(url).observe(this.viewLifecycleOwner) { selectedFeed ->
+                feed = selectedFeed
+                bind(feed)
+            }
+        } else {
+            binding.saveAction.setOnClickListener {
+                addNewItem()
+            }
+        }
     }
 
     /**

@@ -14,8 +14,6 @@ import java.io.InputStream
 import java.net.URL
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 // We don't use namespaces
@@ -24,11 +22,11 @@ private val ns: String? = null
 // Likely a good reference:
 // https://github.com/prof18/RSS-Parser/blob/master/rssparser/src/main/java/com/prof/rssparser/core/CoreXMLParser.kt
 
-class StackOverflowXmlParser {
+// Probably better way to pass in url?
+class FeedParser(private val urlString: String) {
     var TAG = "StackOverflowXmlParser"
 
     @Throws(XmlPullParserException::class, IOException::class)
-    // fun parse(inputStream: InputStream): List<*> {
     fun parse(inputStream: InputStream): List<Item> {
         inputStream.use { inputStream ->
             // val parser: XmlPullParser = Xml.newPullParser()
@@ -100,7 +98,6 @@ class StackOverflowXmlParser {
 
         // where to get this from? title of site?
         // should be able to pass it in somehow I think
-        var feedname = "test_feedname"
 
         var TAG = "PARSER"
         if (postId != null) {
@@ -155,7 +152,7 @@ class StackOverflowXmlParser {
 
 //        return Item(postId = postId!!, title = title!!, author = author!!, feedName = feedname,
 //            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
-        return Item(postId = postId!!, title = title!!, author = author!!, feedName = feedname,
+        return Item(feedUrl = urlString, postId = postId!!, title = title!!, author = author!!,
             link = link!!, timestamp = timestamp!!, content = content!!, read = false)
     }
 
@@ -299,7 +296,7 @@ class NetworkActivity : Activity() {
 //         const val URL = "https://freethoughtblogs.com/feed/"
 //         const val URL = "https://ranprieur.com/feed"
 //         const val URL = "https://pbfcomics.com/feed/"
-         const val URL = "https://www.notechmagazine.com/feed"
+//         const val URL = "https://www.notechmagazine.com/feed"
 
         // Whether there is a Wi-Fi connection.
         private var wifiConnected = true
@@ -317,15 +314,15 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadPage(viewModel: InventoryViewModel) {
+    fun loadPage(viewModel: InventoryViewModel, url: String) {
         // Log.i(TAG, "in LoadPage")
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
             // Log.i(TAG, "running 1st one")
-            loadXmlFromNetwork(URL, viewModel)
+            loadXmlFromNetwork(url, viewModel)
             // DownloadXmlTask().execute(URL)
         } else if (sPref.equals(WIFI) && wifiConnected) {
             // Log.i(TAG, "running 2nd one")
-            loadXmlFromNetwork(URL, viewModel)
+            loadXmlFromNetwork(url, viewModel)
             // DownloadXmlTask().execute(URL)
         } else {
             // show error
@@ -397,7 +394,7 @@ class NetworkActivity : Activity() {
                 // Instantiate the parser
 //                val streamAsString = stream.bufferedReader().use { it.readText() }
 //                Log.i(TAG, "stream: " + streamAsString)
-                StackOverflowXmlParser().parse(stream)
+                FeedParser(urlString).parse(stream)
             } ?: emptyList()
 
             Log.i(TAG, "# entries: " + entries.size)

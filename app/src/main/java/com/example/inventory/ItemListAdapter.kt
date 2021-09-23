@@ -47,7 +47,7 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
         }
         holder.bind(current)
         holder.itemView.setTag("postId".hashCode(), current.postId)
-        holder.itemView.setTag("feedName".hashCode(), current.feedName)
+        holder.itemView.setTag("feedUrl".hashCode(), current.feedUrl)
     }
 
     class ItemViewHolder(private var binding: ItemListItemBinding) :

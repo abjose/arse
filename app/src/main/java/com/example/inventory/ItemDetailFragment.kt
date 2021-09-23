@@ -37,7 +37,8 @@ class ItemDetailFragment : Fragment() {
 
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao()
+            (activity?.application as InventoryApplication).database.itemDao(),
+            (activity?.application as InventoryApplication).database.feedDao()
         )
     }
 
@@ -105,11 +106,11 @@ class ItemDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val postId = navigationArgs.postId
-        val feedName = navigationArgs.feedName
+        val feedUrl = navigationArgs.feedUrl
         // Retrieve the item details using the itemId.
         // Attach an observer on the data (instead of polling for changes) and only update the
         // the UI when the data actually changes.
-        viewModel.retrieveItem(postId, feedName).observe(this.viewLifecycleOwner) { selectedItem ->
+        viewModel.retrieveItem(postId, feedUrl).observe(this.viewLifecycleOwner) { selectedItem ->
             item = selectedItem
             bind(item)
         }

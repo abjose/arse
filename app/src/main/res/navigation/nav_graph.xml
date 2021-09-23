@@ -17,7 +17,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/itemListFragment">
+    app:startDestination="@id/feedListFragment">
 
     <fragment
         android:id="@+id/itemListFragment"
@@ -33,6 +33,9 @@
         <action
             android:id="@+id/action_itemListFragment_to_viewPagerFragment"
             app:destination="@id/viewPagerFragment" />
+        <argument
+            android:name="feed_url"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/itemDetailFragment"
@@ -43,7 +46,7 @@
             android:name="post_id"
             app:argType="integer" />
         <argument
-            android:name="feed_name"
+            android:name="feed_url"
             app:argType="string" />
         <action
             android:id="@+id/action_itemDetailFragment_to_addItemFragment"
@@ -72,13 +75,32 @@
         android:name="com.example.inventory.ViewPagerFragment"
         android:label="ViewPagerFragment" >
         <argument
-            android:name="post_id"
-            app:argType="integer" />
-        <argument
-            android:name="feed_name"
-            app:argType="string" />
-        <argument
             android:name="item_position"
             app:argType="integer" />
+        <argument
+            android:name="feed_url"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/feedListFragment"
+        android:name="com.example.inventory.FeedListFragment"
+        android:label="FeedListFragment" >
+        <action
+            android:id="@+id/action_feedListFragment_to_itemListFragment"
+            app:destination="@id/itemListFragment" />
+        <action
+            android:id="@+id/action_feedListFragment_to_editFeedFragment"
+            app:destination="@id/editFeedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editFeedFragment"
+        android:name="com.example.inventory.EditFeedFragment"
+        android:label="EditFeedFragment" >
+        <action
+            android:id="@+id/action_editFeedFragment_to_feedListFragment"
+            app:destination="@id/feedListFragment" />
+        <argument
+            android:name="feed_url"
+            app:argType="string" />
     </fragment>
 </navigation>

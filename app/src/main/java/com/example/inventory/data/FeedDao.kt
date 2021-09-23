@@ -27,32 +27,22 @@ import kotlinx.coroutines.flow.Flow
  * Database access object to access the Inventory database
  */
 @Dao
-interface ItemDao {
+interface FeedDao {
 
-    @Query("SELECT * from item ORDER BY timestamp ASC")
-    fun getItems(): Flow<List<Item>>
-//
-//    @Query("SELECT * from item WHERE read = 0 ORDER BY timestamp ASC")
-//    fun getUnreadItems(): Flow<List<Item>>
+    @Query("SELECT * from feed ORDER BY name ASC")
+    fun getFeeds(): Flow<List<Feed>>
 
-    @Query("SELECT * from item WHERE post_id = :postId AND feed_url = :feedUrl")
-    fun getItem(postId: Int, feedUrl: String): Flow<Item>
-
-    @Query("SELECT * from item WHERE feed_url = :feedUrl AND read = 0 ORDER BY timestamp ASC")
-    fun getUnreadItemsInFeed(feedUrl: String): Flow<List<Item>>
-
-    // uhh
-    @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_url = :feedUrl")
-    suspend fun markRead(postId: Int, feedUrl: String)
+    @Query("SELECT * from feed WHERE url = :feedUrl")
+    fun getFeed(feedUrl: String): Flow<Feed>
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(item: Item)
+    suspend fun insert(feed: Feed)
 
     @Update
-    suspend fun update(item: Item)
+    suspend fun update(feed: Feed)
 
     @Delete
-    suspend fun delete(item: Item)
+    suspend fun delete(feed: Feed)
 }

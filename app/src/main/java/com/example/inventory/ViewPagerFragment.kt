@@ -23,13 +23,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.example.inventory.databinding.ItemListFragmentBinding
 import com.example.inventory.databinding.ItemPagerBinding
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * Main fragment displaying details for all items in the database.
@@ -45,6 +50,10 @@ class ViewPagerFragment : Fragment() {
     private var _binding: ItemPagerBinding? = null
     private val binding get() = _binding!!
     private val navigationArgs: ViewPagerFragmentArgs by navArgs()
+
+    // Prevent ViewPager list from updating once we've sent it out.
+    private var skipListRefresh: Boolean = false
+    private var positionSet: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,36 +71,38 @@ class ViewPagerFragment : Fragment() {
         val position = navigationArgs.itemPosition
         Log.i("ViewPager", "position: $position")
 
-//        // Retrieve the item details using the itemId.
-//        // Attach an observer on the data (instead of polling for changes) and only update the
-//        // the UI when the data actually changes.
-//        viewModel.retrieveItem(id).observe(this.viewLifecycleOwner) { selectedItem ->
-//            item = selectedItem
-//            bind(item)
-//        }
-
-        val adapter = ViewPagerAdapter()
+        val adapter = ViewPagerAdapter { postId ->
+            // Log.i("ViewPager", "Looking at $postId, $positionSet")
+            if (positionSet) {
+                // Log.i("ViewPager", "marking post $postId read")
+                viewModel.markItemRead(postId, navigationArgs.feedUrl)
+            }
+        }
         // viewpager_binding.viewPager.layout = LinearLayoutManager(this.context)
         binding.viewPager.adapter = adapter
 
-        // Attach an observer on the allItems list to update the UI automatically when the data
-        // changes.
-        // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
-        // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
-        viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedUrl).observe(this.viewLifecycleOwner) { items ->
-            items.let {
-                adapter.submitList(it)
-                // viewpager_adapter.submitList(it)
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                adapter.onPostviewed(position)
             }
-        }
+        })
+
+        loadFeeds(adapter)
 
         // Must be a better way to do this - can see it flash to a different view at first.
 //        binding.viewPager.post {
 //            binding.viewPager.setCurrentItem(position, false)
 //        }
-        binding.viewPager.postDelayed({
-            binding.viewPager.setCurrentItem(position, false)
-        }, 50)  // bleh
+        if (position > 0) {
+            binding.viewPager.postDelayed({
+                // Log.i("ViewPager", "setting position in adapter")
+                positionSet = true
+                binding.viewPager.setCurrentItem(position, false)
+            }, 50)  // bleh
+        } else {
+            positionSet = true
+        }
 
 //        binding.floatingActionButton.setOnClickListener {
 //            val action = ItemListFragmentDirections.actionItemListFragmentToAddItemFragment(
@@ -99,5 +110,26 @@ class ViewPagerFragment : Fragment() {
 //            )
 //            this.findNavController().navigate(action)
 //        }
+    }
+
+    private fun loadFeeds(adapter: ViewPagerAdapter) {
+        lifecycle.coroutineScope.launch {
+            viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedUrl).collectLatest { items ->
+                if (!skipListRefresh) {
+                    skipListRefresh = true
+                    items.let {
+                        adapter.submitList(it)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // binding.viewPager.unregisterOnPageChangeCallback(this)
+        Log.i("ViewPager", "destroyed")
+        skipListRefresh = false
+        positionSet = false
     }
 }

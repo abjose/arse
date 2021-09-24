@@ -111,7 +111,7 @@ class ItemListFragment : Fragment() {
         // changes.
         // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
         // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
-        viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedUrl).observe(this.viewLifecycleOwner) { items ->
+        viewModel.retrieveUnreadItemsInFeedLive(navigationArgs.feedUrl).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)
             }

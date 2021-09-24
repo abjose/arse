@@ -26,6 +26,7 @@ import com.example.inventory.data.FeedDao
 import com.example.inventory.data.Item
 import com.example.inventory.data.ItemDao
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
 
 /**
  * View Model to keep a reference to the Inventory repository and an up-to-date list of all items.
@@ -161,8 +162,11 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         return feedDao.getFeed(feedUrl).asLiveData()
     }
 
-    fun retrieveUnreadItemsInFeed(feedUrl: String): LiveData<List<Item>> {
+    fun retrieveUnreadItemsInFeedLive(feedUrl: String): LiveData<List<Item>> {
         return itemDao.getUnreadItemsInFeed(feedUrl).asLiveData()
+    }
+    fun retrieveUnreadItemsInFeed(feedUrl: String): Flow<List<Item>> {
+        return itemDao.getUnreadItemsInFeed(feedUrl)
     }
 
     /**

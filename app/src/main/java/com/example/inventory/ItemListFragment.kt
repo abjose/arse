@@ -60,6 +60,10 @@ class ItemListFragment : Fragment() {
         return binding.root
     }
 
+    private fun refresh() {
+        na.loadPage(viewModel, navigationArgs.feedUrl)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -98,8 +102,7 @@ class ItemListFragment : Fragment() {
             val LOG_TAG = "REFRESH"
             Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout")
 
-            // myUpdateOperation()
-            na.loadPage(viewModel, navigationArgs.feedUrl)
+            refresh()
 
             swipe_refresh.isRefreshing = false
         }
@@ -115,10 +118,7 @@ class ItemListFragment : Fragment() {
         }
 
         binding.floatingActionButton.setOnClickListener {
-            val action = ItemListFragmentDirections.actionItemListFragmentToAddItemFragment(
-                getString(R.string.add_fragment_title)
-            )
-            this.findNavController().navigate(action)
+            refresh()
         }
     }
 }

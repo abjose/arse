@@ -125,7 +125,7 @@ class FeedListFragment : Fragment() {
                 }
 
                 adapter.setData(feedCategoryMap)
-                
+
                 if (state != null && currentPosition != null) {
                     // Log.i("ExpandableListView", "trying to restore listview state");
                     binding.expandableListView.onRestoreInstanceState(state);

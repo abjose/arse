@@ -75,7 +75,7 @@ class FeedParser(private val urlString: String) {
         // parser.require(XmlPullParser.START_TAG, ns, "item")
         var title: String? = null
         var author: String? = null
-        var summary: String? = null
+        var description: String? = null
         var link: String? = null
         var postId: Int? = null
         var timestamp: Long? = 0
@@ -88,7 +88,7 @@ class FeedParser(private val urlString: String) {
                 "id" -> postId = readId(parser)
                 "title" -> title = readTitle(parser)
                 "author" -> author = readAuthor(parser)
-                // "description" -> summary = readDescription(parser)
+                "description" -> description = readDescription(parser)
                 "link" -> link = readLink(parser)
                 "pubDate" -> timestamp = readTimestamp(parser)
                 "content" -> content = readContent(parser)
@@ -130,6 +130,12 @@ class FeedParser(private val urlString: String) {
             Log.i(TAG, "No timestamp found")
         }
 
+        if (description != null) {
+            Log.i(TAG, "content: " + description!!.substring(0, 100))
+        } else {
+            Log.i(TAG, "No description found")
+        }
+
         if (content != null) {
             Log.i(TAG, "content: " + content!!.substring(0, 100))
         } else {
@@ -147,11 +153,13 @@ class FeedParser(private val urlString: String) {
             link = ""
         }
         if (content == null) {
-            content = ""
+            if (description != null) {
+                content = description
+            } else {
+                content = ""
+            }
         }
 
-//        return Item(postId = postId!!, title = title!!, author = author!!, feedName = feedname,
-//            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
         return Item(feedUrl = urlString, postId = postId!!, title = title!!, author = author!!,
             link = link!!, timestamp = timestamp!!, content = content!!, read = false)
     }
@@ -206,6 +214,14 @@ class FeedParser(private val urlString: String) {
         val author = readText(parser)
         // parser.require(XmlPullParser.END_TAG, ns, "description")
         return author
+    }
+
+    @Throws(IOException::class, XmlPullParserException::class)
+    private fun readDescription(parser: XmlPullParser): String {
+        parser.require(XmlPullParser.START_TAG, ns, "description")
+        val description = readText(parser)
+        parser.require(XmlPullParser.END_TAG, ns, "description")
+        return description
     }
 
     @Throws(IOException::class, XmlPullParserException::class)

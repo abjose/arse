@@ -15,13 +15,17 @@
  */
 package com.example.inventory
 
+import android.app.Activity
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -82,14 +86,16 @@ class EditFeedFragment : Fragment() {
             feedUrl.setText(feed.url, TextView.BufferType.SPANNABLE)
             feedName.setText(feed.name, TextView.BufferType.SPANNABLE)
             category.setText(feed.category, TextView.BufferType.SPANNABLE)
-            saveAction.setOnClickListener { updateItem() }
+            saveAction.setOnClickListener { updateFeed() }
+            deleteAction.setOnClickListener { deleteFeed() }
+            loadOpmlAction.isVisible = false
         }
     }
 
     /**
      * Inserts the new Item into database and navigates up to list fragment.
      */
-    private fun addNewItem() {
+    private fun addNewFeed() {
         if (isEntryValid()) {
             viewModel.addNewFeed(
                 binding.feedUrl.text.toString(),
@@ -104,18 +110,24 @@ class EditFeedFragment : Fragment() {
     /**
      * Updates an existing Item in the database and navigates up to list fragment.
      */
-    private fun updateItem() {
-//        if (isEntryValid()) {
-////            viewModel.updateItem(
-////                this.navigationArgs.itemId,
-////                this.binding.itemName.text.toString(),
-////                this.binding.itemPrice.text.toString(),
-////                this.binding.itemCount.text.toString(),
-////                // false,
-////            )
-//            val action = AddItemFragmentDirections.actionAddItemFragmentToItemListFragment()
-//            findNavController().navigate(action)
-//        }
+    private fun updateFeed() {
+        if (isEntryValid()) {
+            viewModel.updateFeed(
+                binding.feedUrl.text.toString(),
+                binding.feedName.text.toString(),
+                binding.category.text.toString(),
+            )
+            val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
+            findNavController().navigate(action)
+        }
+    }
+
+    private fun deleteFeed() {
+        if (isEntryValid()) {
+            viewModel.deleteFeed(binding.feedUrl.text.toString())
+            val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
+            findNavController().navigate(action)
+        }
     }
 
     /**
@@ -135,8 +147,16 @@ class EditFeedFragment : Fragment() {
             }
         } else {
             binding.saveAction.setOnClickListener {
-                addNewItem()
+                addNewFeed()
             }
+            binding.deleteAction.isVisible = false
+        }
+
+        binding.loadOpmlAction.setOnClickListener {
+            val intent = Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT)
+            startActivityForResult(Intent.createChooser(intent, "Select a file"), 111)
+            val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
+            findNavController().navigate(action)
         }
     }
 
@@ -150,5 +170,21 @@ class EditFeedFragment : Fragment() {
                 InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(requireActivity().currentFocus?.windowToken, 0)
         _binding = null
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 111 && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data //The uri with the location of the file
+            Log.i("Activity", "got da data, uri: " + uri.toString())
+            if (uri != null) {
+                val inputStream = requireContext().contentResolver.openInputStream(uri);
+                val feeds = OPMLParser().parse(inputStream!!)
+                for (feed in feeds) {
+                    viewModel.addNewFeed(feed)
+                }
+            }
+        }
     }
 }

@@ -35,6 +35,9 @@ interface FeedDao {
     @Query("SELECT * from feed WHERE url = :feedUrl")
     fun getFeed(feedUrl: String): Flow<Feed>
 
+    @Query("DELETE from feed WHERE url = :feedUrl")
+    suspend fun deleteByURL(feedUrl: String)
+
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.
     @Insert(onConflict = OnConflictStrategy.IGNORE)

@@ -57,7 +57,10 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
 //        val updatedItem = getUpdatedItemEntry(itemId, itemName, itemPrice, itemCount)
 //        updateItem(updatedItem)
 //    }
-
+    fun updateFeed(url: String, name: String, category: String) {
+        val updatedFeed = getNewFeedEntry(url, name, "", category)
+        updateFeed(updatedFeed)
+    }
 
     /**
      * Launching a new coroutine to update an item in a non-blocking way
@@ -65,6 +68,11 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     private fun updateItem(item: Item) {
         viewModelScope.launch {
             itemDao.update(item)
+        }
+    }
+    private fun updateFeed(feed: Feed) {
+        viewModelScope.launch {
+            feedDao.update(feed)
         }
     }
 
@@ -135,6 +143,11 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     fun deleteItem(item: Item) {
         viewModelScope.launch {
             itemDao.delete(item)
+        }
+    }
+    fun deleteFeed(url: String) {
+        viewModelScope.launch {
+            feedDao.deleteByURL(url)
         }
     }
 

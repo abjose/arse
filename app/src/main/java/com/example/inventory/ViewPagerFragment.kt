@@ -71,13 +71,13 @@ class ViewPagerFragment : Fragment() {
         val position = navigationArgs.itemPosition
         Log.i("ViewPager", "position: $position")
 
-        val adapter = ViewPagerAdapter { postId ->
+        val adapter = ViewPagerAdapter(this.requireContext(), { postId ->
             // Log.i("ViewPager", "Looking at $postId, $positionSet")
             if (positionSet) {
                 // Log.i("ViewPager", "marking post $postId read")
                 viewModel.markItemRead(postId, navigationArgs.feedUrl)
             }
-        }
+        })
         // viewpager_binding.viewPager.layout = LinearLayoutManager(this.context)
         binding.viewPager.adapter = adapter
 

@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.io.InputStream
+import java.lang.Math.min
 import java.net.URL
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -131,13 +132,15 @@ class FeedParser(private val urlString: String) {
         }
 
         if (description != null) {
-            Log.i(TAG, "content: " + description!!.substring(0, 100))
+            val len = min(description.length, 100)
+            Log.i(TAG, "content: " + description!!.substring(0, len))
         } else {
             Log.i(TAG, "No description found")
         }
 
         if (content != null) {
-            Log.i(TAG, "content: " + content!!.substring(0, 100))
+            val len = min(content.length, 100)
+            Log.i(TAG, "content: " + content!!.substring(0, len))
         } else {
             Log.i(TAG, "No content found")
         }

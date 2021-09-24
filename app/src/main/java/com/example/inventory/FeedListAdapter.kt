@@ -8,17 +8,18 @@ import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.TextView
 import com.example.inventory.data.Feed
-
-import java.util.HashMap
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 // remove dataList arg?
 class FeedListAdapter internal constructor(private val context: Context) :
     BaseExpandableListAdapter() {
 
     private var titleList: List<String> = listOf()
-    private var dataList: HashMap<String, MutableList<Feed>> = HashMap<String, MutableList<Feed>>()
+    private var dataList: SortedMap<String, MutableList<Feed>> = sortedMapOf()
 
-    fun setData(dataList: HashMap<String, MutableList<Feed>>) {
+    fun setData(dataList: SortedMap<String, MutableList<Feed>>) {
         // TODO: don't split apart...
         this.dataList = dataList
         this.titleList = ArrayList(dataList.keys)

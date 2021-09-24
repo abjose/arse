@@ -38,6 +38,8 @@ import com.example.inventory.data.Item
 import com.example.inventory.databinding.FeedListFragmentBinding
 import kotlinx.android.synthetic.main.feed_list_fragment.*
 import kotlinx.android.synthetic.main.item_list_fragment.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 // import com.example.inventory.databinding.ItemPagerBinding
 
@@ -57,7 +59,9 @@ class FeedListFragment : Fragment() {
 
     private var state: Parcelable? = null
     private var currentPosition: Int? = null
-    private var feedCategoryMap: HashMap<String, MutableList<Feed>> = HashMap<String, MutableList<Feed>>()
+    private var feedCategoryMap: SortedMap<String, MutableList<Feed>> = sortedMapOf(compareBy<String> {
+        it.toLowerCase()
+    })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,15 +75,6 @@ class FeedListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-//        val adapter = FeedListAdapter { feed: Feed, position: Int ->
-//            val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(item.postId, item.feedName, position)
-//            this.findNavController().navigate(action)
-//        }
-
-        // val listData = data
-        // val titleList = ArrayList(listData.keys)
-        // val adapter = FeedListAdapter(this.requireContext(), titleList as ArrayList<String>, listData)
         val adapter = FeedListAdapter(this.requireContext())
         binding.expandableListView.setAdapter(adapter)
 
@@ -102,7 +97,6 @@ class FeedListFragment : Fragment() {
                 val groupPosition = ExpandableListView.getPackedPositionGroup(id)
                 val childPosition = ExpandableListView.getPackedPositionChild(id)
 
-                // TODO: switch to Feed editing menu? or just have straight from feed items list
                 // Toast.makeText(this.requireContext(), "long-clicked " + groupPosition.toString() + ", " + childPosition.toString() , Toast.LENGTH_SHORT).show()
 
                 val keys = ArrayList(feedCategoryMap.keys)

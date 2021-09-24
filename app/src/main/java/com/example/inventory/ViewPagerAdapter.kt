@@ -2,6 +2,8 @@ package com.example.inventory
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.WebSettings
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -36,10 +38,30 @@ class ViewPagerAdapter(): ListAdapter<Item, ViewPagerAdapter.ItemDetailViewHolde
 
         fun bind(item: Item) {
             binding.itemName.text = item.title
-            // binding.itemPrice.text = item.getFormattedPrice()
-            // binding.itemQuantity.text = item.quantityInStock.toString()
+            // binding.content.text = HtmlCompat.fromHtml(item.content, 0)
+            // binding.content.settings.javaScriptEnabled = true
+            // binding.content.settings.loadWithOverviewMode = true
+            // binding.content.settings.useWideViewPort = true
+            val imageCss = "<style>img{display: inline;height: auto;width: auto;max-width: 100%;}</style>"
+            binding.content.loadDataWithBaseURL(null, imageCss + item.content,"text/html", "UTF-8", null)
         }
     }
+
+//    @SuppressLint("NewApi")
+//    private openWebView() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
+//        } else {
+//            webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+//        }
+//        String data = "<div> your HTML content </div>";
+//        webView.loadDataWithBaseURL("file:///android_asset/", getHtmlData(data), "text/html", "utf-8", null);
+//    }
+//
+//    private String getHtmlData(String bodyHTML) {
+//        String head = "<head><style>img{max-width: 100%; width:auto; height: auto;}</style></head>";
+//        return "<html>" + head + "<body>" + bodyHTML + "</body></html>";
+//    }
 
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<Item>() {

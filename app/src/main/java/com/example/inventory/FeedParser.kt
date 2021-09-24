@@ -285,7 +285,7 @@ fun parseDate(dateString: String): Long {
     return -1
 }
 
-class BlahActivity : Activity() {
+class NetworkActivity : Activity() {
 
     companion object {
 

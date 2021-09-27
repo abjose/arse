@@ -15,6 +15,9 @@
  */
 package com.example.inventory
 
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -22,6 +25,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inventory.data.Item
 import com.example.inventory.databinding.ItemListItemBinding
+import org.jsoup.Jsoup
+import java.lang.Integer.min
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * [ListAdapter] implementation for the recyclerview.
@@ -31,6 +38,7 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
     ListAdapter<Item, ItemListAdapter.ItemViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+        Log.i("ItemListAdapter", "parent: ${parent.toString()}, ${parent.width}, ${parent.height}")
         return ItemViewHolder(
             ItemListItemBinding.inflate(
                 LayoutInflater.from(
@@ -54,9 +62,16 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Item) {
-            binding.itemName.text = item.title
-//            binding.itemPrice.text = item.getFormattedPrice()
-//            binding.itemQuantity.text = item.quantityInStock.toString()
+            binding.itemAuthor.text = item.author
+            val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
+            binding.itemDate.text = sdf.format(Date(item.timestamp))
+
+            val contentString = Jsoup.parse(item.content).text()
+            val ssb = SpannableStringBuilder("${item.title} -  ${contentString.subSequence(0, min(200, contentString.length))}")
+            ssb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, item.title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            binding.itemDescription.text = ssb
+            // binding.itemDescription.ellipsize = TextUtils.TruncateAt.END
+            // binding.itemName.isSingleLine = true
         }
     }
 

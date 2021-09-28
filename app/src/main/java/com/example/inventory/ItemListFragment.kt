@@ -21,6 +21,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -61,7 +62,9 @@ class ItemListFragment : Fragment() {
     }
 
     private fun refresh() {
-        na.loadPage(navigationArgs.feedId, navigationArgs.feedUrl, viewModel)
+        // Toast.makeText(this.requireContext(), "Failed to load feed URL" , Toast.LENGTH_SHORT).show()
+
+        na.loadPage(navigationArgs.feedId, navigationArgs.feedUrl, this.requireContext(), viewModel)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

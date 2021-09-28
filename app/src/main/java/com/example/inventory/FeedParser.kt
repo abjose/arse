@@ -1,7 +1,9 @@
 package com.example.inventory
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.example.inventory.data.Feed
 import com.example.inventory.data.Item
 import kotlinx.coroutines.Dispatchers
@@ -10,9 +12,12 @@ import kotlinx.coroutines.launch
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.lang.Math.min
+import java.net.HttpURLConnection
+import java.net.HttpURLConnection.*
 import java.net.URL
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -26,7 +31,7 @@ private val ns: String? = null
 
 // Probably better way to pass in url?
 class FeedParser(private val feedId: Int) {
-    var TAG = "StackOverflowXmlParser"
+    var TAG = "FeedParser"
 
     @Throws(XmlPullParserException::class, IOException::class)
     fun parse(inputStream: InputStream): List<Item> {
@@ -34,6 +39,7 @@ class FeedParser(private val feedId: Int) {
             // get rid of leading whitespace :'(
             var inputAsString = inputStream.bufferedReader().use { it.readText() }
             inputAsString = inputAsString.trim()
+            // Log.i(TAG, inputAsString)
             val newStream: InputStream = inputAsString.byteInputStream()
 
             // val parser: XmlPullParser = Xml.newPullParser()
@@ -56,19 +62,19 @@ class FeedParser(private val feedId: Int) {
         // while (parser.next() != XmlPullParser.END_TAG) {
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.eventType != XmlPullParser.START_TAG) {
-                // Log.i(TAG, "continuing, eventType: " + parser.eventType)
+                Log.d(TAG, "continuing, eventType: " + parser.eventType)
                 continue
             }
             // Starts by looking for the entry tag
             // if (parser.name == "entry") {
             if (parser.name == "channel") {
-                // Log.i(TAG, "channel; continuing")
+                Log.d(TAG, "channel; continuing")
                 parser.next()
             } else if (parser.name == "item" || parser.name == "entry") {
-                // Log.i(TAG, "reading item/entry")
+                Log.d(TAG, "reading item/entry")
                 entries.add(readEntry(parser))
             } else {
-                // Log.i(TAG, "skipping, name: " + parser.name)
+                Log.d(TAG, "skipping, name: " + parser.name)
                 skip(parser)
             }
         }
@@ -87,7 +93,9 @@ class FeedParser(private val feedId: Int) {
         var postId: Int? = null
         var timestamp: Long? = 0
         var content: String? = null
-        while (parser.next() != XmlPullParser.END_TAG) {
+
+        val startDepth = parser.depth
+        while (parser.next() != XmlPullParser.END_TAG || parser.depth > startDepth) {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 continue
             }
@@ -98,7 +106,7 @@ class FeedParser(private val feedId: Int) {
                 "description" -> description = readDescription(parser)
                 "link" -> link = readLink(parser)
                 "pubDate" -> timestamp = readTimestamp(parser)
-                "content" -> content = readContent(parser)
+                "content" -> content = readContent(parser, content)
                 else -> skip(parser)
             }
         }
@@ -139,7 +147,7 @@ class FeedParser(private val feedId: Int) {
 
         if (description != null) {
             val len = min(description.length, 100)
-            Log.i(TAG, "content: " + description!!.substring(0, len))
+            Log.i(TAG, "description: " + description!!.substring(0, len))
         } else {
             Log.i(TAG, "No description found")
         }
@@ -155,22 +163,13 @@ class FeedParser(private val feedId: Int) {
         if (postId == null) {
             postId = (title + timestamp.toString()).hashCode()
         }
-        if (author == null) {
-            author = ""
-        }
-        if (link == null) {
-            link = ""
-        }
-        if (content == null) {
-            if (description != null) {
-                content = description
-            } else {
-                content = ""
-            }
+        if (content == null && description != null) {
+            Log.i(TAG, "Overwriting content")
+            content = description
         }
 
-        return Item(feedId = feedId, postId = postId!!, title = title!!, author = author!!,
-            link = link!!, timestamp = timestamp!!, content = content!!, read = false)
+        return Item(feedId = feedId, postId = postId!!, title = title!!, author = author ?: "",
+            link = link ?: "", timestamp = timestamp!!, content = content ?: "", read = false)
     }
 
     private fun simplifyTag(tag: String): String {
@@ -178,7 +177,7 @@ class FeedParser(private val feedId: Int) {
             tag.contains("id") -> "id"
             tag.contains("creator") -> "author"
             tag.contains("date") -> "pubDate"
-            tag.contains("content") -> "content"
+            tag.contains("content") && !tag.contains("media") -> "content"
             else -> tag
         }
     }
@@ -220,7 +219,21 @@ class FeedParser(private val feedId: Int) {
     @Throws(IOException::class, XmlPullParserException::class)
     private fun readAuthor(parser: XmlPullParser): String {
         // parser.require(XmlPullParser.START_TAG, ns, "description")
-        val author = readText(parser)
+        val startDepth = parser.depth
+        var author = readText(parser)
+
+        // Handle feeds with tags nested inside Author
+        while (parser.depth > startDepth) {
+            if (parser.eventType != XmlPullParser.START_TAG) {
+                continue
+            }
+
+            if (parser.name == "name") {
+                author = readText(parser)
+                break
+            }
+
+        }
         // parser.require(XmlPullParser.END_TAG, ns, "description")
         return author
     }
@@ -234,10 +247,13 @@ class FeedParser(private val feedId: Int) {
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
-    private fun readContent(parser: XmlPullParser): String {
+    private fun readContent(parser: XmlPullParser, oldContent: String?): String {
         // parser.require(XmlPullParser.START_TAG, ns, "content")
         val content = readText(parser)
         // parser.require(XmlPullParser.END_TAG, ns, "content")
+        if (content.isBlank() && oldContent != null) {
+            return oldContent
+        }
         return content
     }
 
@@ -290,9 +306,8 @@ fun parseDate(dateString: String): Long {
     val formats: List<SimpleDateFormat> = listOf(
         // SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
         SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
-        // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
-        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
-        // 2021-09-20T20:40:59Z
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
         // SimpleDateFormat("MM-dd-yyyy"),
         // SimpleDateFormat("yyyyMMdd"),
         // SimpleDateFormat("MM/dd/yyyy"),
@@ -339,15 +354,15 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadPage(feedId: Int, feedUrl: String, viewModel: InventoryViewModel) {
+    fun loadPage(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel) {
         // Log.i(TAG, "in LoadPage")
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
             // Log.i(TAG, "running 1st one")
-            loadXmlFromNetwork(feedId, feedUrl, viewModel)
+            loadXmlFromNetwork(feedId, feedUrl, context, viewModel)
             // DownloadXmlTask().execute(URL)
         } else if (sPref.equals(WIFI) && wifiConnected) {
             // Log.i(TAG, "running 2nd one")
-            loadXmlFromNetwork(feedId, feedUrl, viewModel)
+            loadXmlFromNetwork(feedId, feedUrl, context, viewModel)
             // DownloadXmlTask().execute(URL)
         } else {
             // show error
@@ -413,38 +428,69 @@ class NetworkActivity : Activity() {
 //        }.toString()
 //    }
 
-    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, viewModel: InventoryViewModel) {
+    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel) {
         GlobalScope.launch(Dispatchers.IO) {
-            val entries: List<Item> = downloadUrl(feedUrl)?.use { stream ->
-                // Instantiate the parser
-//                val streamAsString = stream.bufferedReader().use { it.readText() }
-//                Log.i(TAG, "stream: " + streamAsString)
-                FeedParser(feedId).parse(stream)
-            } ?: emptyList()
+            var entries: List<Item> = emptyList()
+
+
+//            entries = downloadUrl(feedUrl)?.use { stream ->
+//                FeedParser(feedId).parse(stream)
+//            } ?: emptyList()
+
+            try {
+                entries = downloadUrl(feedUrl)?.use { stream ->
+                    FeedParser(feedId).parse(stream)
+                } ?: emptyList()
+            } catch (e: XmlPullParserException) {
+                runOnUiThread {
+                    Toast.makeText(context, "Failed to parse feed", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: FileNotFoundException) {
+                runOnUiThread {
+                    Toast.makeText(context, "Couldn't load feed", Toast.LENGTH_SHORT).show()
+                }
+            }
 
             Log.i(TAG, "# entries: " + entries.size)
             for (entry in entries) {
-
-                // Log.i(TAG, entry.title + " ... " + entry.description)// + " ... " + entry.link)
                 Log.i(TAG, entry.title)
-                // blah
-
-                // adapter.addItem(entry)
                 viewModel.addNewItem(entry)
             }
-//            runOnUiThread {
-//                adapter.notifyDataSetChanged()
-//                // adapter.notifyItemInserted()
-//            }
-            //adapter.refresh()
         }
+    }
+
+    @Throws(IOException::class)
+    private fun openConnection(initialUrl: String): HttpURLConnection? {
+        var url = initialUrl
+        for (i in 1..10) {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            val code = connection.responseCode
+            if (code == HTTP_MOVED_PERM || code == HTTP_MOVED_TEMP || code == HTTP_SEE_OTHER) {
+            // if (connection.responseCode != HTTP_OK) {
+                url = connection.getHeaderField("Location")
+                Log.i(TAG, "redirecting to $url")
+                connection.disconnect()
+            } else {
+                Log.i(TAG, "returning connection to $url")
+                return connection
+            }
+        }
+
+        return null
     }
 
     // Given a string representation of a URL, sets up a connection and gets
     // an input stream.
     @Throws(IOException::class)
     private fun downloadUrl(urlString: String): InputStream? {
-        return URL(urlString).openConnection().getInputStream()
+        val connection = openConnection(urlString)
+        if (connection != null) {
+            return connection.inputStream
+        }
+        return null
+        // val connection = URL(urlString).openConnection() as HttpURLConnection
+        // connection.instanceFollowRedirects = true
+
 
 //        val url = URL(urlString)
 //        return (url.openConnection() as? HttpURLConnection)?.run {

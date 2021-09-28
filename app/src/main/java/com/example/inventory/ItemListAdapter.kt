@@ -55,7 +55,7 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
         }
         holder.bind(current)
         holder.itemView.setTag("postId".hashCode(), current.postId)
-        holder.itemView.setTag("feedUrl".hashCode(), current.feedUrl)
+        holder.itemView.setTag("feedId".hashCode(), current.feedId)
     }
 
     class ItemViewHolder(private var binding: ItemListItemBinding) :
@@ -90,7 +90,7 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
     fun onItemDismiss(position: Int) {
         // items.removeAt(position)
         // actually remove from db? / mark as read
-        notifyItemRemoved(position)
+        // notifyItemRemoved(position)
         // onSwiped()
     }
 }

@@ -86,7 +86,7 @@ class FeedListFragment : Fragment() {
 
             val keys = ArrayList(feedCategoryMap.keys)
             val feed = feedCategoryMap[keys[groupPosition]]!![childPosition]
-            val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feed.url)
+            val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feed.id, feed.url)
             this.findNavController().navigate(action)
 
             false
@@ -101,7 +101,7 @@ class FeedListFragment : Fragment() {
 
                 val keys = ArrayList(feedCategoryMap.keys)
                 val feed = feedCategoryMap[keys[groupPosition]]!![childPosition]
-                val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment(feed.url)
+                val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment(feed.id)
                 this.findNavController().navigate(action)
 
                 true
@@ -134,7 +134,7 @@ class FeedListFragment : Fragment() {
         }
 
         binding.floatingActionButton.setOnClickListener {
-            val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment("")
+            val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment(0)
             this.findNavController().navigate(action)
         }
     }

@@ -75,7 +75,7 @@ class ViewPagerFragment : Fragment() {
             // Log.i("ViewPager", "Looking at $postId, $positionSet")
             if (positionSet) {
                 // Log.i("ViewPager", "marking post $postId read")
-                viewModel.markItemRead(postId, navigationArgs.feedUrl)
+                viewModel.markItemRead(postId, navigationArgs.feedId)
             }
         })
         // viewpager_binding.viewPager.layout = LinearLayoutManager(this.context)
@@ -114,7 +114,7 @@ class ViewPagerFragment : Fragment() {
 
     private fun loadFeeds(adapter: ViewPagerAdapter) {
         lifecycle.coroutineScope.launch {
-            viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedUrl).collectLatest { items ->
+            viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedId).collectLatest { items ->
                 if (!skipListRefresh) {
                     skipListRefresh = true
                     items.let {

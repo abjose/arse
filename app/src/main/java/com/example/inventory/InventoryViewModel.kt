@@ -58,8 +58,9 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
 //        val updatedItem = getUpdatedItemEntry(itemId, itemName, itemPrice, itemCount)
 //        updateItem(updatedItem)
 //    }
-    fun updateFeed(url: String, name: String, category: String) {
-        val updatedFeed = getNewFeedEntry(url, name, "", category)
+
+    fun updateFeed(feedId: Int, url: String, name: String, category: String) {
+        val updatedFeed = getUpdatedeedEntry(feedId, url, name, "", category)
         updateFeed(updatedFeed)
     }
 
@@ -89,9 +90,9 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
 //    }
 
     // fun markItemRead(item: Item) {
-    fun markItemRead(postId: Int, feedUrl: String) {
+    fun markItemRead(postId: Int, feedId: Int) {
         viewModelScope.launch {
-            itemDao.markRead(postId, feedUrl)
+            itemDao.markRead(postId, feedId)
         }
 //        // val item = itemDao.getItem(id)
 //        val item = retrieveItem(id)
@@ -146,27 +147,27 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
             itemDao.delete(item)
         }
     }
-    fun deleteFeed(url: String) {
+    fun deleteFeed(id: Int) {
         viewModelScope.launch {
-            feedDao.deleteByURL(url)
+            feedDao.delete(id)
         }
     }
 
     /**
      * Retrieve an item from the repository.
      */
-    fun retrieveItem(postId: Int, feedUrl: String): LiveData<Item> {
-        return itemDao.getItem(postId, feedUrl).asLiveData()
+    fun retrieveItem(postId: Int, feedId: Int): LiveData<Item> {
+        return itemDao.getItem(postId, feedId).asLiveData()
     }
-    fun retrieveFeed(feedUrl: String): LiveData<Feed> {
-        return feedDao.getFeed(feedUrl).asLiveData()
+    fun retrieveFeed(feedId: Int): LiveData<Feed> {
+        return feedDao.getFeed(feedId).asLiveData()
     }
 
-    fun retrieveUnreadItemsInFeedLive(feedUrl: String): LiveData<List<Item>> {
-        return itemDao.getUnreadItemsInFeed(feedUrl).asLiveData()
+    fun retrieveUnreadItemsInFeedLive(feedId: Int): LiveData<List<Item>> {
+        return itemDao.getUnreadItemsInFeed(feedId).asLiveData()
     }
-    fun retrieveUnreadItemsInFeed(feedUrl: String): Flow<List<Item>> {
-        return itemDao.getUnreadItemsInFeed(feedUrl)
+    fun retrieveUnreadItemsInFeed(feedId: Int): Flow<List<Item>> {
+        return itemDao.getUnreadItemsInFeed(feedId)
     }
 
     /**
@@ -190,9 +191,9 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
      * Returns an instance of the [Item] entity class with the item info entered by the user.
      * This will be used to add a new entry to the Inventory database.
      */
-    private fun getNewItemEntry(feedUrl: String, postId: Int, title: String, author: String, link: String, timestamp: Long, content: String): Item {
+    private fun getNewItemEntry(feedId: Int, postId: Int, title: String, author: String, link: String, timestamp: Long, content: String): Item {
         return Item(
-            feedUrl = feedUrl,
+            feedId = feedId,
             postId = postId,
             title = title,
             author = author,
@@ -204,6 +205,16 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     }
     private fun getNewFeedEntry(url: String, name: String, htmlUrl: String, category: String): Feed {
         return Feed(
+            url = url,
+            name = name,
+            htmlUrl = htmlUrl,
+            category = category
+        )
+    }
+
+    private fun getUpdatedeedEntry(id: Int, url: String, name: String, htmlUrl: String, category: String): Feed {
+        return Feed(
+            id = id,
             url = url,
             name = name,
             htmlUrl = htmlUrl,

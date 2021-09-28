@@ -35,15 +35,15 @@ interface ItemDao {
 //    @Query("SELECT * from item WHERE read = 0 ORDER BY timestamp ASC")
 //    fun getUnreadItems(): Flow<List<Item>>
 
-    @Query("SELECT * from item WHERE post_id = :postId AND feed_url = :feedUrl")
-    fun getItem(postId: Int, feedUrl: String): Flow<Item>
+    @Query("SELECT * from item WHERE post_id = :postId AND feed_id = :feedId")
+    fun getItem(postId: Int, feedId: Int): Flow<Item>
 
-    @Query("SELECT * from item WHERE feed_url = :feedUrl AND read = 0 ORDER BY timestamp ASC")
-    fun getUnreadItemsInFeed(feedUrl: String): Flow<List<Item>>
+    @Query("SELECT * from item WHERE feed_id = :feedId AND read = 0 ORDER BY timestamp ASC")
+    fun getUnreadItemsInFeed(feedId: Int): Flow<List<Item>>
 
     // uhh
-    @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_url = :feedUrl")
-    suspend fun markRead(postId: Int, feedUrl: String)
+    @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_id = :feedId")
+    suspend fun markRead(postId: Int, feedId: Int)
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.

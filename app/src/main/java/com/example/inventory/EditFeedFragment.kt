@@ -113,6 +113,7 @@ class EditFeedFragment : Fragment() {
     private fun updateFeed() {
         if (isEntryValid()) {
             viewModel.updateFeed(
+                navigationArgs.feedId,
                 binding.feedUrl.text.toString(),
                 binding.feedName.text.toString(),
                 binding.category.text.toString(),
@@ -124,7 +125,7 @@ class EditFeedFragment : Fragment() {
 
     private fun deleteFeed() {
         if (isEntryValid()) {
-            viewModel.deleteFeed(binding.feedUrl.text.toString())
+            viewModel.deleteFeed(navigationArgs.feedId)
             val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
             findNavController().navigate(action)
         }
@@ -139,9 +140,9 @@ class EditFeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val url = navigationArgs.feedUrl
-        if (url.isNotEmpty()) {
-            viewModel.retrieveFeed(url).observe(this.viewLifecycleOwner) { selectedFeed ->
+        val feedId = navigationArgs.feedId
+        if (feedId > 0) {
+            viewModel.retrieveFeed(feedId).observe(this.viewLifecycleOwner) { selectedFeed ->
                 feed = selectedFeed
                 bind(feed)
             }

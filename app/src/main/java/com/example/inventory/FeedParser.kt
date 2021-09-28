@@ -2,6 +2,7 @@ package com.example.inventory
 
 import android.app.Activity
 import android.util.Log
+import com.example.inventory.data.Feed
 import com.example.inventory.data.Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,17 +25,23 @@ private val ns: String? = null
 // https://github.com/prof18/RSS-Parser/blob/master/rssparser/src/main/java/com/prof/rssparser/core/CoreXMLParser.kt
 
 // Probably better way to pass in url?
-class FeedParser(private val urlString: String) {
+class FeedParser(private val feedId: Int) {
     var TAG = "StackOverflowXmlParser"
 
     @Throws(XmlPullParserException::class, IOException::class)
     fun parse(inputStream: InputStream): List<Item> {
         inputStream.use { inputStream ->
+            // get rid of leading whitespace :'(
+            var inputAsString = inputStream.bufferedReader().use { it.readText() }
+            inputAsString = inputAsString.trim()
+            val newStream: InputStream = inputAsString.byteInputStream()
+
             // val parser: XmlPullParser = Xml.newPullParser()
             val parserFactory = XmlPullParserFactory.newInstance()
             val parser = parserFactory.newPullParser()
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-            parser.setInput(inputStream, null)
+            // parser.setInput(inputStream, null)
+            parser.setInput(newStream, "UTF-8")
             //parser.setInput(inputStream, "utf-8")
             parser.nextTag()
             return readFeed(parser)
@@ -46,7 +53,8 @@ class FeedParser(private val urlString: String) {
         val entries = mutableListOf<Item>()
 
         // parser.require(XmlPullParser.START_TAG, ns, "feed")
-        while (parser.next() != XmlPullParser.END_TAG) {
+        // while (parser.next() != XmlPullParser.END_TAG) {
+        while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 // Log.i(TAG, "continuing, eventType: " + parser.eventType)
                 continue
@@ -66,8 +74,6 @@ class FeedParser(private val urlString: String) {
         }
         return entries
     }
-
-    // MAKE SURE TO POPULATE POST_ID!!! and feedName
 
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
     // to their respective "read" methods for processing. Otherwise, skips the tag.
@@ -163,7 +169,7 @@ class FeedParser(private val urlString: String) {
             }
         }
 
-        return Item(feedUrl = urlString, postId = postId!!, title = title!!, author = author!!,
+        return Item(feedId = feedId, postId = postId!!, title = title!!, author = author!!,
             link = link!!, timestamp = timestamp!!, content = content!!, read = false)
     }
 
@@ -333,15 +339,15 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadPage(viewModel: InventoryViewModel, url: String) {
+    fun loadPage(feedId: Int, feedUrl: String, viewModel: InventoryViewModel) {
         // Log.i(TAG, "in LoadPage")
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
             // Log.i(TAG, "running 1st one")
-            loadXmlFromNetwork(url, viewModel)
+            loadXmlFromNetwork(feedId, feedUrl, viewModel)
             // DownloadXmlTask().execute(URL)
         } else if (sPref.equals(WIFI) && wifiConnected) {
             // Log.i(TAG, "running 2nd one")
-            loadXmlFromNetwork(url, viewModel)
+            loadXmlFromNetwork(feedId, feedUrl, viewModel)
             // DownloadXmlTask().execute(URL)
         } else {
             // show error
@@ -407,13 +413,13 @@ class NetworkActivity : Activity() {
 //        }.toString()
 //    }
 
-    private fun loadXmlFromNetwork(urlString: String, viewModel: InventoryViewModel) {
+    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, viewModel: InventoryViewModel) {
         GlobalScope.launch(Dispatchers.IO) {
-            val entries: List<Item> = downloadUrl(urlString)?.use { stream ->
+            val entries: List<Item> = downloadUrl(feedUrl)?.use { stream ->
                 // Instantiate the parser
 //                val streamAsString = stream.bufferedReader().use { it.readText() }
 //                Log.i(TAG, "stream: " + streamAsString)
-                FeedParser(urlString).parse(stream)
+                FeedParser(feedId).parse(stream)
             } ?: emptyList()
 
             Log.i(TAG, "# entries: " + entries.size)

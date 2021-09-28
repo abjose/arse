@@ -102,10 +102,10 @@ class OPMLParser() {
         }
         if (category != null) {
             // Log.i("OPMLParser", "Adding feed: $url, $name, $category")
-            return Feed(url, name, htmlUrl, category as String)
+            return Feed(0, url, name, htmlUrl, category as String)
         }
         // parser.require(XmlPullParser.END_TAG, ns, "content")
-        return Feed(url, name, htmlUrl, "Uncategorized")
+        return Feed(0, url, name, htmlUrl, "Uncategorized")
     }
 
     @Throws(XmlPullParserException::class, IOException::class)

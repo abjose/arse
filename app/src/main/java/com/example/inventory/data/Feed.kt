@@ -23,10 +23,10 @@ import java.time.LocalDateTime
 
 @Entity()
 data class Feed(
-//    @PrimaryKey(autoGenerate = true)
-//    val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
 
-    @PrimaryKey(autoGenerate = false) @ColumnInfo(name = "url")
+    @ColumnInfo(name = "url")
     val url: String,
     @ColumnInfo(name = "name")
     val name: String,

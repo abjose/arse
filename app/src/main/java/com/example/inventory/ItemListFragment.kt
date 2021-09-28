@@ -61,7 +61,7 @@ class ItemListFragment : Fragment() {
     }
 
     private fun refresh() {
-        na.loadPage(viewModel, navigationArgs.feedUrl)
+        na.loadPage(navigationArgs.feedId, navigationArgs.feedUrl, viewModel)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -69,7 +69,7 @@ class ItemListFragment : Fragment() {
 
         // RecyclerView
         val adapter = ItemListAdapter { item: Item, position: Int ->
-            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedUrl)
+            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedId)
             this.findNavController().navigate(action)
         }
         adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
@@ -90,9 +90,9 @@ class ItemListFragment : Fragment() {
                     adapter.onItemDismiss(viewHolder.adapterPosition)
 
                     val postId = viewHolder.itemView.getTag("postId".hashCode()) as Int
-                    val feedUrl = viewHolder.itemView.getTag("feedUrl".hashCode()) as String
-                    Log.v("SWIPED", postId.toString() + ", " + feedUrl);
-                    viewModel.markItemRead(postId, feedUrl)
+                    val feedId = viewHolder.itemView.getTag("feedId".hashCode()) as Int
+                    Log.v("SWIPED", postId.toString() + ", " + feedId);
+                    viewModel.markItemRead(postId, feedId)
                 }
             }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
@@ -111,7 +111,7 @@ class ItemListFragment : Fragment() {
         // changes.
         // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
         // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
-        viewModel.retrieveUnreadItemsInFeedLive(navigationArgs.feedUrl).observe(this.viewLifecycleOwner) { items ->
+        viewModel.retrieveUnreadItemsInFeedLive(navigationArgs.feedId).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)
             }

@@ -32,11 +32,13 @@ interface FeedDao {
     @Query("SELECT * from feed ORDER BY name ASC")
     fun getFeeds(): Flow<List<Feed>>
 
+    @Query("SELECT * from feed WHERE id = :feedId")
+    fun getFeed(feedId: Int): Flow<Feed>
     @Query("SELECT * from feed WHERE url = :feedUrl")
     fun getFeed(feedUrl: String): Flow<Feed>
 
-    @Query("DELETE from feed WHERE url = :feedUrl")
-    suspend fun deleteByURL(feedUrl: String)
+    @Query("DELETE from feed WHERE id = :feedId")
+    suspend fun delete(feedId: Int)
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.

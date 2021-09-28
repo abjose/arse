@@ -24,14 +24,14 @@ import java.time.LocalDateTime
 /**
  * Entity data class represents a single row in the database.
  */
-@Entity(primaryKeys=["feed_url", "post_id"])
+@Entity(primaryKeys=["feed_id", "post_id"])
 data class Item(
     // @PrimaryKey(autoGenerate = true)
     // val id: Int = 0,
 
-    // TODO: change this to a foreign key into Feeds db
-    @ColumnInfo(name = "feed_url")
-    val feedUrl: String,
+    // TODO: change this to a foreign key
+    @ColumnInfo(name = "feed_id")
+    val feedId: Int,
     @ColumnInfo(name = "post_id")
     val postId: Int,
 

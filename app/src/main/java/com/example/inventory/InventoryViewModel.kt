@@ -103,11 +103,6 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     /**
      * Launching a new coroutine to delete an item in a non-blocking way
      */
-    fun deleteItem(item: Item) {
-        viewModelScope.launch {
-            itemDao.delete(item)
-        }
-    }
     fun deleteFeed(id: Int) {
         viewModelScope.launch {
             feedDao.delete(id)

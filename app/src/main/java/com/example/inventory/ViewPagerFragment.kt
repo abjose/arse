@@ -71,13 +71,13 @@ class ViewPagerFragment : Fragment() {
         val position = navigationArgs.itemPosition
         Log.i("ViewPager", "position: $position")
 
-        val adapter = ViewPagerAdapter(this.requireContext(), { postId ->
+        val adapter = ViewPagerAdapter(this.requireContext()) { postId ->
             // Log.i("ViewPager", "Looking at $postId, $positionSet")
             if (positionSet) {
                 // Log.i("ViewPager", "marking post $postId read")
                 viewModel.markItemRead(postId, navigationArgs.feedId)
             }
-        })
+        }
         // viewpager_binding.viewPager.layout = LinearLayoutManager(this.context)
         binding.viewPager.adapter = adapter
 
@@ -113,13 +113,11 @@ class ViewPagerFragment : Fragment() {
     }
 
     private fun loadFeeds(adapter: ViewPagerAdapter) {
-        lifecycle.coroutineScope.launch {
-            viewModel.retrieveUnreadItemsInFeed(navigationArgs.feedId).collectLatest { items ->
-                if (!skipListRefresh) {
-                    skipListRefresh = true
-                    items.let {
-                        adapter.submitList(it)
-                    }
+        viewModel.retrieveUnreadItemsInFeedLive(navigationArgs.feedId).observe(this.viewLifecycleOwner) { items ->
+            if (!skipListRefresh) {
+                skipListRefresh = true
+                items.let {
+                    adapter.submitList(it)
                 }
             }
         }

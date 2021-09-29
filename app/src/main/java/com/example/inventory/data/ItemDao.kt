@@ -29,15 +29,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ItemDao {
 
-    @Query("SELECT * from item ORDER BY timestamp ASC")
-    fun getItems(): Flow<List<Item>>
-//
-//    @Query("SELECT * from item WHERE read = 0 ORDER BY timestamp ASC")
-//    fun getUnreadItems(): Flow<List<Item>>
-
-    @Query("SELECT * from item WHERE post_id = :postId AND feed_id = :feedId")
-    fun getItem(postId: Int, feedId: Int): Flow<Item>
-
     @Query("SELECT * from item WHERE feed_id = :feedId AND read = 0 ORDER BY timestamp ASC")
     fun getUnreadItemsInFeed(feedId: Int): Flow<List<Item>>
 

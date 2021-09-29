@@ -34,60 +34,21 @@ import kotlinx.coroutines.flow.Flow
  */
 class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: FeedDao) : ViewModel() {
 
-    // Cache all items form the database using LiveData.
-//    val allItems: LiveData<List<Item>> = itemDao.getItems().asLiveData()
-//    val unreadItems: LiveData<List<Item>> = itemDao.getUnreadItems().asLiveData()
     val allFeeds: LiveData<List<Feed>> = feedDao.getFeeds().asLiveData()
 
-//    /**
-//     * Returns true if stock is available to sell, false otherwise.
-//     */
-//    fun isStockAvailable(item: Item): Boolean {
-//        return (item.quantityInStock > 0)
-//    }
-
-//    /**
-//     * Updates an existing Item in the database.
-//     */
-//    fun updateItem(
-//        itemId: Int,
-//        itemName: String,
-//        itemPrice: String,
-//        itemCount: String
-//    ) {
-//        val updatedItem = getUpdatedItemEntry(itemId, itemName, itemPrice, itemCount)
-//        updateItem(updatedItem)
-//    }
-
     fun updateFeed(feedId: Int, url: String, name: String, category: String) {
-        val updatedFeed = getUpdatedeedEntry(feedId, url, name, "", category)
+        val updatedFeed = getUpdatededEntry(feedId, url, name, "", category)
         updateFeed(updatedFeed)
     }
 
     /**
      * Launching a new coroutine to update an item in a non-blocking way
      */
-    private fun updateItem(item: Item) {
-        viewModelScope.launch {
-            itemDao.update(item)
-        }
-    }
     private fun updateFeed(feed: Feed) {
         viewModelScope.launch {
             feedDao.update(feed)
         }
     }
-
-//    /**
-//     * Decreases the stock by one unit and updates the database.
-//     */
-//    fun sellItem(item: Item) {
-//        if (item.quantityInStock > 0) {
-//            // Decrease the quantity by 1
-//            val newItem = item.copy(quantityInStock = item.quantityInStock - 1)
-//            updateItem(newItem)
-//        }
-//    }
 
     // fun markItemRead(item: Item) {
     fun markItemRead(postId: Int, feedId: Int) {
@@ -156,9 +117,6 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     /**
      * Retrieve an item from the repository.
      */
-    fun retrieveItem(postId: Int, feedId: Int): LiveData<Item> {
-        return itemDao.getItem(postId, feedId).asLiveData()
-    }
     fun retrieveFeed(feedId: Int): LiveData<Feed> {
         return feedDao.getFeed(feedId).asLiveData()
     }
@@ -173,13 +131,6 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     /**
      * Returns true if the EditTexts are not empty
      */
-    fun isEntryValid(itemName: String, itemPrice: String, itemCount: String): Boolean {
-        if (itemName.isBlank() || itemPrice.isBlank() || itemCount.isBlank()) {
-            return false
-        }
-        return true
-    }
-
     fun isFeedEntryValid(url: String, name: String, category: String): Boolean {
         if (url.isBlank() || name.isBlank()) {
             return false
@@ -191,18 +142,6 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
      * Returns an instance of the [Item] entity class with the item info entered by the user.
      * This will be used to add a new entry to the Inventory database.
      */
-    private fun getNewItemEntry(feedId: Int, postId: Int, title: String, author: String, link: String, timestamp: Long, content: String): Item {
-        return Item(
-            feedId = feedId,
-            postId = postId,
-            title = title,
-            author = author,
-            link = link,
-            timestamp = timestamp,
-            content = content,
-            read = false
-        )
-    }
     private fun getNewFeedEntry(url: String, name: String, htmlUrl: String, category: String): Feed {
         return Feed(
             url = url,
@@ -212,7 +151,7 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         )
     }
 
-    private fun getUpdatedeedEntry(id: Int, url: String, name: String, htmlUrl: String, category: String): Feed {
+    private fun getUpdatededEntry(id: Int, url: String, name: String, htmlUrl: String, category: String): Feed {
         return Feed(
             id = id,
             url = url,
@@ -221,26 +160,6 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
             category = category
         )
     }
-
-//    /**
-//     * Called to update an existing entry in the Inventory database.
-//     * Returns an instance of the [Item] entity class with the item info updated by the user.
-//     */
-//    private fun getUpdatedItemEntry(
-//        itemId: Int,
-//        itemName: String,
-//        itemPrice: String,
-//        itemCount: String,
-//        // read: Boolean,
-//    ): Item {
-//        return Item(
-//            id = itemId,
-//            itemName = itemName,
-//            itemPrice = itemPrice.toDouble(),
-//            quantityInStock = itemCount.toInt(),
-//            read = false,
-//        )
-//    }
 }
 
 /**

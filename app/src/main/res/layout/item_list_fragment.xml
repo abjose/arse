@@ -45,7 +45,7 @@
         android:layout_marginEnd="@dimen/margin_between_elements"
         android:layout_marginBottom="@dimen/margin_between_elements"
         android:contentDescription="@string/refresh_feed"
-        android:src="@android:drawable/stat_notify_sync"
+        android:src="@android:drawable/ic_popup_sync"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@android:color/white" />

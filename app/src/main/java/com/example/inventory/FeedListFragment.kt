@@ -59,6 +59,8 @@ class FeedListFragment : Fragment() {
 
     private var state: Parcelable? = null
     private var currentPosition: Int? = null
+
+    // Map from category to list of Feeds.
     private var feedCategoryMap: SortedMap<String, MutableList<Feed>> = sortedMapOf(compareBy<String> {
         it.toLowerCase()
     })
@@ -93,8 +95,8 @@ class FeedListFragment : Fragment() {
         }
 
         binding.expandableListView.setOnItemLongClickListener { parent, view, position, id ->
+            val groupPosition = ExpandableListView.getPackedPositionGroup(id)
             if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                val groupPosition = ExpandableListView.getPackedPositionGroup(id)
                 val childPosition = ExpandableListView.getPackedPositionChild(id)
 
                 // Toast.makeText(this.requireContext(), "long-clicked " + groupPosition.toString() + ", " + childPosition.toString() , Toast.LENGTH_SHORT).show()
@@ -103,6 +105,16 @@ class FeedListFragment : Fragment() {
                 val feed = feedCategoryMap[keys[groupPosition]]!![childPosition]
                 val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment(feed.id)
                 this.findNavController().navigate(action)
+
+                true
+            } else if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                Log.i("FeedListFragment", "long click on group")
+
+//                val keys = ArrayList(feedCategoryMap.keys)
+//                val feeds = feedCategoryMap[keys[groupPosition]]!!
+//
+//                val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feed.id, feed.url)
+//                this.findNavController().navigate(action)
 
                 true
             } else {

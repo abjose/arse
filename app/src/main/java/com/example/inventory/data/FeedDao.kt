@@ -34,8 +34,6 @@ interface FeedDao {
 
     @Query("SELECT * from feed WHERE id = :feedId")
     fun getFeed(feedId: Int): Flow<Feed>
-    @Query("SELECT * from feed WHERE url = :feedUrl")
-    fun getFeed(feedUrl: String): Flow<Feed>
 
     @Query("DELETE from feed WHERE id = :feedId")
     suspend fun delete(feedId: Int)

@@ -21,7 +21,7 @@ import androidx.room.PrimaryKey
 import java.text.NumberFormat
 import java.time.LocalDateTime
 
-@Entity()
+@Entity
 data class Feed(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

@@ -354,84 +354,26 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadPage(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel) {
+    fun loadPage(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
         // Log.i(TAG, "in LoadPage")
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
             // Log.i(TAG, "running 1st one")
-            loadXmlFromNetwork(feedId, feedUrl, context, viewModel)
+            loadXmlFromNetwork(feedId, feedUrl, context, viewModel, doneCallback)
             // DownloadXmlTask().execute(URL)
-        } else if (sPref.equals(WIFI) && wifiConnected) {
-            // Log.i(TAG, "running 2nd one")
-            loadXmlFromNetwork(feedId, feedUrl, context, viewModel)
-            // DownloadXmlTask().execute(URL)
-        } else {
-            // show error
-            Log.i(TAG, "didn't do any of them")
         }
+//        else if (sPref.equals(WIFI) && wifiConnected) {
+//            // Log.i(TAG, "running 2nd one")
+//            loadXmlFromNetwork(feedId, feedUrl, context, viewModel)
+//            // DownloadXmlTask().execute(URL)
+//        } else {
+//            // show error
+//            Log.i(TAG, "didn't do any of them")
+//        }
     }
 
-    // Implementation of AsyncTask used to download XML feed from stackoverflow.com.
-//    private inner class DownloadXmlTask : AsyncTask<String, Void, String>() {
-//        override fun doInBackground(vararg urls: String): String {
-//            // return try {
-//            try {
-//                loadXmlFromNetwork(urls[0])
-//            } catch (e: IOException) {
-//                resources.getString(R.string.connection_error)
-//            } catch (e: XmlPullParserException) {
-//                resources.getString(R.string.xml_error)
-//            }
-//        }
-//
-//        override fun onPostExecute(result: String) {
-//            setContentView(R.layout.main)
-//            // Displays the HTML string in the UI via a WebView
-//            findViewById<WebView>(R.id.webview)?.apply {
-//                loadData(result, "text/html", null)
-//            }
-//        }
-//    }
-
-//    // Uploads XML from stackoverflow.com, parses it, and combines it with
-//    // HTML markup. Returns HTML string.
-//    @Throws(XmlPullParserException::class, IOException::class)
-//    private fun loadXmlFromNetwork(urlString: String): String {
-//        // Checks whether the user set the preference to include summary text
-//        val pref: Boolean = PreferenceManager.getDefaultSharedPreferences(this)?.run {
-//            getBoolean("summaryPref", false)
-//        } ?: false
-//
-//        val entries: List<Entry> = downloadUrl(urlString)?.use { stream ->
-//            // Instantiate the parser
-//            StackOverflowXmlParser().parse(stream)
-//        } ?: emptyList()
-//
-//        return StringBuilder().apply {
-//            append("<h3>${resources.getString(R.string.page_title)}</h3>")
-//            append("<em>${resources.getString(R.string.updated)} ")
-//            append("${formatter.format(rightNow.time)}</em>")
-//            // StackOverflowXmlParser returns a List (called "entries") of Entry objects.
-//            // Each Entry object represents a single post in the XML feed.
-//            // This section processes the entries list to combine each entry with HTML markup.
-//            // Each entry is displayed in the UI as a link that optionally includes
-//            // a text summary.
-//            entries.forEach { entry ->
-//                append("<p><a href='")
-//                append(entry.link)
-//                append("'>" + entry.title + "</a></p>")
-//                // If the user set the preference to include summary text,
-//                // adds it to the display.
-//                if (pref) {
-//                    append(entry.summary)
-//                }
-//            }
-//        }.toString()
-//    }
-
-    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel) {
+    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
         GlobalScope.launch(Dispatchers.IO) {
             var entries: List<Item> = emptyList()
-
 
 //            entries = downloadUrl(feedUrl)?.use { stream ->
 //                FeedParser(feedId).parse(stream)
@@ -456,6 +398,10 @@ class NetworkActivity : Activity() {
                 Log.i(TAG, entry.title)
                 viewModel.addNewItem(entry)
             }
+
+            runOnUiThread {
+                doneCallback()
+            }
         }
     }
 
@@ -466,7 +412,6 @@ class NetworkActivity : Activity() {
             val connection = URL(url).openConnection() as HttpURLConnection
             val code = connection.responseCode
             if (code == HTTP_MOVED_PERM || code == HTTP_MOVED_TEMP || code == HTTP_SEE_OTHER) {
-            // if (connection.responseCode != HTTP_OK) {
                 url = connection.getHeaderField("Location")
                 Log.i(TAG, "redirecting to $url")
                 connection.disconnect()
@@ -490,17 +435,5 @@ class NetworkActivity : Activity() {
         return null
         // val connection = URL(urlString).openConnection() as HttpURLConnection
         // connection.instanceFollowRedirects = true
-
-
-//        val url = URL(urlString)
-//        return (url.openConnection() as? HttpURLConnection)?.run {
-//            readTimeout = 10000
-//            connectTimeout = 15000
-//            requestMethod = "GET"
-//            doInput = true
-//            // Starts the query
-//            connect()
-//            inputStream
-//        }
     }
 }

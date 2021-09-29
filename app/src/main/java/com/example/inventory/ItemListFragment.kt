@@ -64,7 +64,11 @@ class ItemListFragment : Fragment() {
     private fun refresh() {
         // Toast.makeText(this.requireContext(), "Failed to load feed URL" , Toast.LENGTH_SHORT).show()
 
-        na.loadPage(navigationArgs.feedId, navigationArgs.feedUrl, this.requireContext(), viewModel)
+        swipe_refresh.isRefreshing = true
+        na.loadPage(navigationArgs.feedId, navigationArgs.feedUrl, this.requireContext(), viewModel, {
+            Log.i("ItemListFragment", "refresh is done")
+            swipe_refresh.isRefreshing = false
+        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -106,8 +110,6 @@ class ItemListFragment : Fragment() {
             Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout")
 
             refresh()
-
-            swipe_refresh.isRefreshing = false
         }
 
         // Attach an observer on the allItems list to update the UI automatically when the data

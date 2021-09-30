@@ -28,11 +28,11 @@
             android:id="@+id/action_itemListFragment_to_viewPagerFragment"
             app:destination="@id/viewPagerFragment" />
         <argument
-            android:name="feed_id"
-            app:argType="integer" />
+            android:name="feed_ids"
+            app:argType="integer[]" />
         <argument
-            android:name="feed_url"
-            app:argType="string" />
+            android:name="feed_urls"
+            app:argType="string[]" />
     </fragment>
     <fragment
         android:id="@+id/viewPagerFragment"
@@ -42,8 +42,8 @@
             android:name="item_position"
             app:argType="integer" />
         <argument
-            android:name="feed_id"
-            app:argType="integer" />
+            android:name="feed_ids"
+            app:argType="integer[]" />
     </fragment>
     <fragment
         android:id="@+id/feedListFragment"

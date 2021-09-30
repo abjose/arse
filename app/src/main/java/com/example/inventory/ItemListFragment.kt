@@ -65,18 +65,18 @@ class ItemListFragment : Fragment() {
         // Toast.makeText(this.requireContext(), "Failed to load feed URL" , Toast.LENGTH_SHORT).show()
 
         swipe_refresh.isRefreshing = true
-        na.loadPage(navigationArgs.feedId, navigationArgs.feedUrl, this.requireContext(), viewModel, {
+        na.loadFeed(navigationArgs.feedIds, navigationArgs.feedUrls, this.requireContext(), viewModel) {
             Log.i("ItemListFragment", "refresh is done")
             swipe_refresh.isRefreshing = false
-        })
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // RecyclerView
-        val adapter = ItemListAdapter { item: Item, position: Int ->
-            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedId)
+        val adapter = ItemListAdapter(navigationArgs.feedIds.size > 1, viewModel) { position: Int ->
+            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedIds)
             this.findNavController().navigate(action)
         }
         adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
@@ -116,7 +116,7 @@ class ItemListFragment : Fragment() {
         // changes.
         // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
         // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
-        viewModel.retrieveUnreadItemsInFeedLive(navigationArgs.feedId).observe(this.viewLifecycleOwner) { items ->
+        viewModel.retrieveUnreadItemsInFeeds(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)
             }

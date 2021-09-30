@@ -6,19 +6,12 @@ import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.webkit.WebSettings
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.text.HtmlCompat
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.example.inventory.data.Item
-// import com.example.inventory.databinding.FragmentItemDetailBinding
 import com.example.inventory.databinding.PagerDetailBinding
-import com.example.inventory.databinding.ItemListItemBinding
-import kotlinx.android.synthetic.main.item_pager.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,7 +20,7 @@ import java.util.*
  */
 
 // Helpful page for setting up ViewPager: https://g403.co/android-viewpager2/
-class ViewPagerAdapter(private val context: Context, private val markItemRead: (postId: Int) -> Unit) :
+class ViewPagerAdapter(private val context: Context, private val markItemRead: (postId: Int, feedId: Int) -> Unit) :
     ListAdapter<Item, ViewPagerAdapter.ItemDetailViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemDetailViewHolder {
@@ -40,13 +33,13 @@ class ViewPagerAdapter(private val context: Context, private val markItemRead: (
     override fun onBindViewHolder(holder: ItemDetailViewHolder, position: Int) {
         val current = getItem(position)
         holder.bind(current)
-        // holder.itemView.setTag(current.id)
+        // holder.itemView.setTag("feedId".hashCode(), current.feedId)
     }
 
-    fun onPostviewed(position: Int) {
+    fun onPostViewed(position: Int) {
         val item = getItem(position)
         Log.i("ViewPager", "onPostViewed: ${item.postId}")
-        markItemRead(item.postId)
+        markItemRead(item.postId, item.feedId)
     }
 
     override fun getItemViewType(position: Int) = R.layout.pager_detail

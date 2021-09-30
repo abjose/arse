@@ -354,12 +354,13 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadPage(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
+    fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
         // Log.i(TAG, "in LoadPage")
+        assert(feedIds.size == feedUrls.size)
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
-            // Log.i(TAG, "running 1st one")
-            loadXmlFromNetwork(feedId, feedUrl, context, viewModel, doneCallback)
-            // DownloadXmlTask().execute(URL)
+            for (i in feedIds.indices) {
+                loadXmlFromNetwork(feedIds[i], feedUrls[i], context, viewModel, doneCallback)
+            }
         }
 //        else if (sPref.equals(WIFI) && wifiConnected) {
 //            // Log.i(TAG, "running 2nd one")

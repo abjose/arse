@@ -50,6 +50,14 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         }
     }
 
+    // ???
+    fun retrieveFeedAndRunCallback(feedId: Int, callback: (feed: Feed) -> Unit) {
+        viewModelScope.launch {
+            val feed = feedDao.getFeedNow(feedId)
+            callback(feed)
+        }
+    }
+
     // fun markItemRead(item: Item) {
     fun markItemRead(postId: Int, feedId: Int) {
         viewModelScope.launch {
@@ -116,11 +124,11 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         return feedDao.getFeed(feedId).asLiveData()
     }
 
-    fun retrieveUnreadItemsInFeedLive(feedId: Int): LiveData<List<Item>> {
+    fun retrieveUnreadItemsInFeed(feedId: Int): LiveData<List<Item>> {
         return itemDao.getUnreadItemsInFeed(feedId).asLiveData()
     }
-    fun retrieveUnreadItemsInFeed(feedId: Int): Flow<List<Item>> {
-        return itemDao.getUnreadItemsInFeed(feedId)
+    fun retrieveUnreadItemsInFeeds(feedIds: IntArray): LiveData<List<Item>> {
+        return itemDao.getUnreadItemsInFeeds(feedIds).asLiveData()
     }
 
     /**

@@ -20,11 +20,13 @@ import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inventory.data.Item
 import com.example.inventory.databinding.ItemListItemBinding
+import kotlinx.coroutines.coroutineScope
 import org.jsoup.Jsoup
 import java.lang.Integer.min
 import java.text.SimpleDateFormat
@@ -34,7 +36,7 @@ import java.util.*
  * [ListAdapter] implementation for the recyclerview.
  */
 
-class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
+class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel, private val onItemClicked: (Int) -> Unit) :
     ListAdapter<Item, ItemListAdapter.ItemViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -44,25 +46,33 @@ class ItemListAdapter(private val onItemClicked: (Item, Int) -> Unit) :
                 LayoutInflater.from(
                     parent.context
                 )
-            )
+            ), isMultiFeed, viewModel
         )
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val current = getItem(position)
         holder.itemView.setOnClickListener {
-            onItemClicked(current, position)
+            onItemClicked(position)
         }
         holder.bind(current)
         holder.itemView.setTag("postId".hashCode(), current.postId)
         holder.itemView.setTag("feedId".hashCode(), current.feedId)
     }
 
-    class ItemViewHolder(private var binding: ItemListItemBinding) :
+    class ItemViewHolder(private var binding: ItemListItemBinding, private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Item) {
             binding.itemAuthor.text = item.author
+            if (isMultiFeed) {
+                viewModel.retrieveFeedAndRunCallback(item.feedId) { feed ->
+                    if (feed.name != item.author) {
+                        // Log.i("ItemListAdapter", "In the callback, got ${feed.name}")
+                        binding.itemAuthor.text = "${item.author} (${feed.name})"
+                    }
+                }
+            }
             val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
             binding.itemDate.text = sdf.format(Date(item.timestamp))
 

@@ -88,7 +88,7 @@ class FeedListFragment : Fragment() {
 
             val keys = ArrayList(feedCategoryMap.keys)
             val feed = feedCategoryMap[keys[groupPosition]]!![childPosition]
-            val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feed.id, feed.url)
+            val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(intArrayOf(feed.id), arrayOf(feed.url))
             this.findNavController().navigate(action)
 
             false
@@ -110,11 +110,18 @@ class FeedListFragment : Fragment() {
             } else if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                 Log.i("FeedListFragment", "long click on group")
 
-//                val keys = ArrayList(feedCategoryMap.keys)
-//                val feeds = feedCategoryMap[keys[groupPosition]]!!
-//
-//                val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feed.id, feed.url)
-//                this.findNavController().navigate(action)
+                val keys = ArrayList(feedCategoryMap.keys)
+                val feeds = feedCategoryMap[keys[groupPosition]]!!
+
+                val feedIds: IntArray = IntArray(feeds.size)
+                val feedUrls: Array<String> = Array<String>(feeds.size) { "" }
+                for (i in feeds.indices) {
+                    feedIds[i] = feeds[i].id
+                    feedUrls[i] = feeds[i].url
+                }
+
+                val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feedIds, feedUrls)
+                this.findNavController().navigate(action)
 
                 true
             } else {

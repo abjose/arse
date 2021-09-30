@@ -23,18 +23,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.coroutineScope
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.example.inventory.databinding.ItemListFragmentBinding
 import com.example.inventory.databinding.ItemPagerBinding
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * Main fragment displaying details for all items in the database.
@@ -71,38 +62,25 @@ class ViewPagerFragment : Fragment() {
         val position = navigationArgs.itemPosition
         Log.i("ViewPager", "position: $position")
 
-        val adapter = ViewPagerAdapter(this.requireContext()) { postId ->
+        val adapter = ViewPagerAdapter(this.requireContext()) { postId, feedId ->
             // Log.i("ViewPager", "Looking at $postId, $positionSet")
             if (positionSet) {
                 // Log.i("ViewPager", "marking post $postId read")
-                viewModel.markItemRead(postId, navigationArgs.feedId)
+                viewModel.markItemRead(postId, feedId)
             }
         }
         // viewpager_binding.viewPager.layout = LinearLayoutManager(this.context)
         binding.viewPager.adapter = adapter
+        // binding.viewPager.offscreenPageLimit = 3
 
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                adapter.onPostviewed(position)
+                adapter.onPostViewed(position)
             }
         })
 
         loadFeeds(adapter)
-
-        // Must be a better way to do this - can see it flash to a different view at first.
-//        binding.viewPager.post {
-//            binding.viewPager.setCurrentItem(position, false)
-//        }
-        if (position > 0) {
-            binding.viewPager.postDelayed({
-                // Log.i("ViewPager", "setting position in adapter")
-                positionSet = true
-                binding.viewPager.setCurrentItem(position, false)
-            }, 50)  // bleh
-        } else {
-            positionSet = true
-        }
 
 //        binding.floatingActionButton.setOnClickListener {
 //            val action = ItemListFragmentDirections.actionItemListFragmentToAddItemFragment(
@@ -112,13 +90,23 @@ class ViewPagerFragment : Fragment() {
 //        }
     }
 
+    private fun setPosition(position: Int) {
+        Log.i("ViewPager", "setting position in adapter to $position")
+        positionSet = true
+        if (position > 0) {
+            binding.viewPager.setCurrentItem(position, false)
+        }
+    }
+
     private fun loadFeeds(adapter: ViewPagerAdapter) {
-        viewModel.retrieveUnreadItemsInFeedLive(navigationArgs.feedId).observe(this.viewLifecycleOwner) { items ->
+        viewModel.retrieveUnreadItemsInFeeds(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { items ->
             if (!skipListRefresh) {
                 skipListRefresh = true
                 items.let {
                     adapter.submitList(it)
                 }
+
+                setPosition(navigationArgs.itemPosition)
             }
         }
     }

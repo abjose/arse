@@ -6,14 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import com.example.inventory.data.Feed
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
-// remove dataList arg?
-class FeedListAdapter internal constructor(private val context: Context) :
+class FeedListAdapter internal constructor(private val context: Context,
+                                           private val onTextClick: (position: Int) -> Unit,
+                                           private val onIndicatorClick: (position: Int, isExpanded: Boolean) -> Unit) :
     BaseExpandableListAdapter() {
 
     private var titleList: List<String> = listOf()
@@ -73,6 +74,15 @@ class FeedListAdapter internal constructor(private val context: Context) :
         val listTitleTextView = convertView!!.findViewById<TextView>(R.id.listTitle)
         listTitleTextView.setTypeface(null, Typeface.BOLD)
         listTitleTextView.text = listTitle
+        listTitleTextView.setOnClickListener {
+            onTextClick(listPosition)
+        }
+
+        val indicator = convertView!!.findViewById<ImageView>(R.id.groupIndicatorArea)
+        indicator.setOnClickListener {
+            onIndicatorClick(listPosition, isExpanded)
+        }
+
         return convertView
     }
 

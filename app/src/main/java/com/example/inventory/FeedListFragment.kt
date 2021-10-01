@@ -16,8 +16,6 @@
 
 package com.example.inventory
 
-import android.app.Activity.RESULT_OK
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
@@ -25,19 +23,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ExpandableListView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.inventory.data.Feed
-import com.example.inventory.data.Item
 import com.example.inventory.databinding.FeedListFragmentBinding
-import kotlinx.android.synthetic.main.feed_list_fragment.*
-import kotlinx.android.synthetic.main.item_list_fragment.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -77,7 +67,19 @@ class FeedListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = FeedListAdapter(this.requireContext())
+        val adapter = FeedListAdapter(this.requireContext(), { position: Int ->
+            Log.i("FeedListAdapter", "onTextClick")
+            openMultiFeed(position)
+        }, { position: Int, isExpanded: Boolean ->
+            Log.i("FeedListAdapter", "onIndicatorClick: $position, $isExpanded")
+            if (isExpanded) {
+                binding.expandableListView.collapseGroup(position);
+            } else {
+                binding.expandableListView.expandGroup(position);
+            }
+        })
+
+
         binding.expandableListView.setAdapter(adapter)
 
 //        binding.expandableListView.setOnGroupExpandListener { groupPosition -> Toast.makeText(applicationContext, (titleList as ArrayList<String>)[groupPosition] + " List Expanded.", Toast.LENGTH_SHORT).show() }
@@ -104,23 +106,6 @@ class FeedListFragment : Fragment() {
                 val keys = ArrayList(feedCategoryMap.keys)
                 val feed = feedCategoryMap[keys[groupPosition]]!![childPosition]
                 val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment(feed.id)
-                this.findNavController().navigate(action)
-
-                true
-            } else if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
-                Log.i("FeedListFragment", "long click on group")
-
-                val keys = ArrayList(feedCategoryMap.keys)
-                val feeds = feedCategoryMap[keys[groupPosition]]!!
-
-                val feedIds: IntArray = IntArray(feeds.size)
-                val feedUrls: Array<String> = Array<String>(feeds.size) { "" }
-                for (i in feeds.indices) {
-                    feedIds[i] = feeds[i].id
-                    feedUrls[i] = feeds[i].url
-                }
-
-                val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feedIds, feedUrls)
                 this.findNavController().navigate(action)
 
                 true
@@ -156,6 +141,21 @@ class FeedListFragment : Fragment() {
             val action = FeedListFragmentDirections.actionFeedListFragmentToEditFeedFragment(0)
             this.findNavController().navigate(action)
         }
+    }
+
+    private fun openMultiFeed(groupPosition: Int) {
+        val keys = ArrayList(feedCategoryMap.keys)
+        val feeds = feedCategoryMap[keys[groupPosition]]!!
+
+        val feedIds = IntArray(feeds.size)
+        val feedUrls: Array<String> = Array(feeds.size) { "" }
+        for (i in feeds.indices) {
+            feedIds[i] = feeds[i].id
+            feedUrls[i] = feeds[i].url
+        }
+
+        val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feedIds, feedUrls)
+        this.findNavController().navigate(action)
     }
 
     override fun onPause() {

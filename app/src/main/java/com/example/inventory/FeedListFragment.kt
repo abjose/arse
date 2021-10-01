@@ -127,6 +127,12 @@ class FeedListFragment : Fragment() {
                     }
                 }
 
+                for (key in feedCategoryMap.keys) {
+                    feedCategoryMap[key]!!.sortWith(compareBy<Feed> { feed ->
+                        feed.name.toLowerCase()
+                    })
+                }
+
                 adapter.setData(feedCategoryMap)
 
                 if (state != null && currentPosition != null) {

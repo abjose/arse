@@ -168,7 +168,7 @@ class FeedParser(private val feedId: Int) {
             content = description
         }
 
-        return Item(feedId = feedId, postId = postId!!, title = title!!, author = author ?: "",
+        return Item(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "",
             link = link ?: "", timestamp = timestamp!!, content = content ?: "", read = false)
     }
 
@@ -308,6 +308,9 @@ fun parseDate(dateString: String): Long {
         SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ENGLISH),
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:Z", Locale.ENGLISH),
         // SimpleDateFormat("MM-dd-yyyy"),
         // SimpleDateFormat("yyyyMMdd"),
         // SimpleDateFormat("MM/dd/yyyy"),
@@ -331,12 +334,6 @@ class NetworkActivity : Activity() {
 
         const val WIFI = "Wi-Fi"
         const val ANY = "Any"
-
-//         const val URL = "http://stackoverflow.com/feeds/tag?tagnames=android&sort=newest"
-//         const val URL = "https://freethoughtblogs.com/feed/"
-//         const val URL = "https://ranprieur.com/feed"
-//         const val URL = "https://pbfcomics.com/feed/"
-//         const val URL = "https://www.notechmagazine.com/feed"
 
         // Whether there is a Wi-Fi connection.
         private var wifiConnected = true

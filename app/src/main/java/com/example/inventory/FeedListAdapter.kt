@@ -17,18 +17,20 @@ class FeedListAdapter internal constructor(private val context: Context,
                                            private val onIndicatorClick: (position: Int, isExpanded: Boolean) -> Unit) :
     BaseExpandableListAdapter() {
 
-    private var titleList: List<String> = listOf()
-    private var dataList: SortedMap<String, MutableList<Feed>> = sortedMapOf()
+    private var categoryList: List<String> = listOf()
+    private var dataList: SortedMap<String, MutableList<Feed>> = sortedMapOf(compareBy<String> {
+        it.toLowerCase()
+    })
 
     fun setData(dataList: SortedMap<String, MutableList<Feed>>) {
         // TODO: don't split apart...
         this.dataList = dataList
-        this.titleList = ArrayList(dataList.keys)
+        this.categoryList = ArrayList(dataList.keys)
         notifyDataSetChanged()
     }
 
     override fun getChild(listPosition: Int, expandedListPosition: Int): Any {
-        return this.dataList[this.titleList[listPosition]]!![expandedListPosition]
+        return this.dataList[this.categoryList[listPosition]]!![expandedListPosition]
     }
 
     override fun getChildId(listPosition: Int, expandedListPosition: Int): Long {
@@ -37,7 +39,6 @@ class FeedListAdapter internal constructor(private val context: Context,
 
     override fun getChildView(listPosition: Int, expandedListPosition: Int, isLastChild: Boolean, convertView: View?, parent: ViewGroup): View {
         var convertView = convertView
-        // val expandedListText = getChild(listPosition, expandedListPosition) as String
         val expandedListFeed = getChild(listPosition, expandedListPosition) as Feed
         if (convertView == null) {
             val layoutInflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -49,15 +50,15 @@ class FeedListAdapter internal constructor(private val context: Context,
     }
 
     override fun getChildrenCount(listPosition: Int): Int {
-        return this.dataList[this.titleList[listPosition]]!!.size
+        return this.dataList[this.categoryList[listPosition]]!!.size
     }
 
     override fun getGroup(listPosition: Int): Any {
-        return this.titleList[listPosition]
+        return this.categoryList[listPosition]
     }
 
     override fun getGroupCount(): Int {
-        return this.titleList.size
+        return this.categoryList.size
     }
 
     override fun getGroupId(listPosition: Int): Long {

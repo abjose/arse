@@ -68,8 +68,11 @@ class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
             if (isMultiFeed) {
                 viewModel.retrieveFeedAndRunCallback(item.feedId) { feed ->
                     if (feed.name != item.author) {
-                        // Log.i("ItemListAdapter", "In the callback, got ${feed.name}")
-                        binding.itemAuthor.text = "${item.author} (${feed.name})"
+                        if (item.author.isBlank()) {
+                            binding.itemAuthor.text = "${feed.name}"
+                        } else {
+                            binding.itemAuthor.text = "${item.author} (${feed.name})"
+                        }
                     }
                 }
             }

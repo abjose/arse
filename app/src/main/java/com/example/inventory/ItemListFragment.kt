@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -112,10 +113,16 @@ class ItemListFragment : Fragment() {
             refresh()
         }
 
+        viewModel.retrieveFeedAndRunCallback(navigationArgs.feedIds[0]) { feed ->
+            if (navigationArgs.feedIds.size == 1) {
+                (activity as AppCompatActivity).supportActionBar!!.title = feed.name
+            } else {
+                (activity as AppCompatActivity).supportActionBar!!.title = feed.category
+            }
+        }
+
         // Attach an observer on the allItems list to update the UI automatically when the data
         // changes.
-        // viewModel.allItems.observe(this.viewLifecycleOwner) { items ->
-        // viewModel.unreadItems.observe(this.viewLifecycleOwner) { items ->
         viewModel.retrieveUnreadItemsInFeeds(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)

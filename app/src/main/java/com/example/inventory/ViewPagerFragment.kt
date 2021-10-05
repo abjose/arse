@@ -18,9 +18,8 @@ package com.example.inventory
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
@@ -57,6 +56,9 @@ class ViewPagerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // (activity as AppCompatActivity).supportActionBar!!.isHideOnContentScrollEnabled = true
+        (activity as AppCompatActivity).supportActionBar!!.hide()
 
         // val id = navigationArgs.itemId
         val position = navigationArgs.itemPosition
@@ -113,6 +115,9 @@ class ViewPagerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        (activity as AppCompatActivity).supportActionBar!!.show()
+
         // binding.viewPager.unregisterOnPageChangeCallback(this)
         Log.i("ViewPager", "destroyed")
         skipListRefresh = false

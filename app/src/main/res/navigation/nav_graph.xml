@@ -22,7 +22,7 @@
     <fragment
         android:id="@+id/itemListFragment"
         android:name="com.example.inventory.ItemListFragment"
-        android:label="@string/app_name"
+        android:label=" "
         tools:layout="@layout/item_list_fragment">
         <action
             android:id="@+id/action_itemListFragment_to_viewPagerFragment"
@@ -37,7 +37,7 @@
     <fragment
         android:id="@+id/viewPagerFragment"
         android:name="com.example.inventory.ViewPagerFragment"
-        android:label="ViewPagerFragment" >
+        android:label=" ">
         <argument
             android:name="item_position"
             app:argType="integer" />
@@ -48,7 +48,7 @@
     <fragment
         android:id="@+id/feedListFragment"
         android:name="com.example.inventory.FeedListFragment"
-        android:label="FeedListFragment" >
+        android:label="@string/app_name">
         <action
             android:id="@+id/action_feedListFragment_to_itemListFragment"
             app:destination="@id/itemListFragment" />
@@ -59,7 +59,7 @@
     <fragment
         android:id="@+id/editFeedFragment"
         android:name="com.example.inventory.EditFeedFragment"
-        android:label="EditFeedFragment" >
+        android:label=" ">
         <action
             android:id="@+id/action_editFeedFragment_to_feedListFragment"
             app:destination="@id/feedListFragment" />

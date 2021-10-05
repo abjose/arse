@@ -25,6 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -82,6 +83,7 @@ class EditFeedFragment : Fragment() {
      * Binds views with the passed in [item] information.
      */
     private fun bind(feed: Feed) {
+        (activity as AppCompatActivity).supportActionBar!!.title = "Editing ${feed.name}"
         binding.apply {
             feedUrl.setText(feed.url, TextView.BufferType.SPANNABLE)
             feedName.setText(feed.name, TextView.BufferType.SPANNABLE)

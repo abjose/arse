@@ -27,7 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.inventory.data.Feed
-import com.example.inventory.databinding.FeedListFragmentBinding
+import com.example.inventory.databinding.FragmentFeedListBinding
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -44,7 +44,7 @@ class FeedListFragment : Fragment() {
         )
     }
 
-    private var _binding: FeedListFragmentBinding? = null
+    private var _binding: FragmentFeedListBinding? = null
     private val binding get() = _binding!!
 
     private var state: Parcelable? = null
@@ -60,7 +60,7 @@ class FeedListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FeedListFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentFeedListBinding.inflate(inflater, container, false)
         return binding.root
     }
 

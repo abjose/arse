@@ -16,6 +16,8 @@
 package com.example.inventory
 
 import android.os.Bundle
+import android.view.Window
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -26,6 +28,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
+
         super.onCreate(savedInstanceState)
 
         // Retrieve NavController from the NavHostFragment

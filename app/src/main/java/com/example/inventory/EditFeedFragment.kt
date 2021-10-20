@@ -32,8 +32,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.inventory.data.Feed
-import com.example.inventory.data.Item
-import com.example.inventory.databinding.FragmentAddItemBinding
 import com.example.inventory.databinding.FragmentEditFeedBinding
 
 /**

@@ -23,7 +23,7 @@
         android:id="@+id/itemListFragment"
         android:name="com.example.inventory.ItemListFragment"
         android:label=" "
-        tools:layout="@layout/item_list_fragment">
+        tools:layout="@layout/fragment_item_list">
         <action
             android:id="@+id/action_itemListFragment_to_viewPagerFragment"
             app:destination="@id/viewPagerFragment" />

@@ -45,6 +45,13 @@ class ViewPagerFragment : Fragment() {
     private var skipListRefresh: Boolean = false
     private var positionSet: Boolean = false
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        (activity as AppCompatActivity).supportActionBar!!.isHideOnContentScrollEnabled = true
+
+        super.onCreate(savedInstanceState)
+        // setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,9 +63,6 @@ class ViewPagerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // (activity as AppCompatActivity).supportActionBar!!.isHideOnContentScrollEnabled = true
-        (activity as AppCompatActivity).supportActionBar!!.hide()
 
         // val id = navigationArgs.itemId
         val position = navigationArgs.itemPosition
@@ -116,7 +120,7 @@ class ViewPagerFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        (activity as AppCompatActivity).supportActionBar!!.show()
+        (activity as AppCompatActivity).supportActionBar!!.isHideOnContentScrollEnabled = false
 
         // binding.viewPager.unregisterOnPageChangeCallback(this)
         Log.i("ViewPager", "destroyed")

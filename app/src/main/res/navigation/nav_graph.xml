@@ -36,8 +36,7 @@
     </fragment>
     <fragment
         android:id="@+id/viewPagerFragment"
-        android:name="com.example.inventory.ViewPagerFragment"
-        android:label=" ">
+        android:name="com.example.inventory.ViewPagerFragment">
         <argument
             android:name="item_position"
             app:argType="integer" />

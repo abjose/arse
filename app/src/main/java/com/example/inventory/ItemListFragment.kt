@@ -18,10 +18,7 @@ package com.example.inventory
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -30,10 +27,9 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.inventory.data.Item
-import com.example.inventory.databinding.ItemListFragmentBinding
-import kotlinx.android.synthetic.main.item_list_fragment.*
+import com.example.inventory.databinding.FragmentItemListBinding
+import kotlinx.android.synthetic.main.fragment_item_list.*
 
 // import com.example.inventory.databinding.ItemPagerBinding
 
@@ -48,17 +44,29 @@ class ItemListFragment : Fragment() {
         )
     }
 
-    private var _binding: ItemListFragmentBinding? = null
+    private var _binding: FragmentItemListBinding? = null
     private val binding get() = _binding!!
     private val na = NetworkActivity()
     private val navigationArgs: ItemListFragmentArgs by navArgs()
+
+    // State for handling context menu choices.
+    private var longClickedPostId: Int = 0
+    private var longClickedFeedId: Int = 0
+    private var longClickedPosition: Int = -1
+
+    private var currentList: List<Item> = listOf()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // registerForContextMenu(recyclerView)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = ItemListFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentItemListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -76,13 +84,23 @@ class ItemListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // RecyclerView
-        val adapter = ItemListAdapter(navigationArgs.feedIds.size > 1, viewModel) { position: Int ->
+        val adapter = ItemListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
             val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedIds)
             this.findNavController().navigate(action)
-        }
+
+        }, { postId: Int, feedId: Int, position: Int ->
+            longClickedPostId = postId
+            longClickedFeedId = feedId
+            longClickedPosition = position
+
+            // Can't get it to work the "real" way for some reason.
+            requireActivity().openContextMenu(recyclerView)
+        })
         adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         binding.recyclerView.layoutManager = LinearLayoutManager(this.context)
         binding.recyclerView.adapter = adapter
+
+        registerForContextMenu(binding.recyclerView)
 
         // Move this stuff somewhere else
         // https://stackoverflow.com/questions/49827752/how-to-implement-drag-and-drop-and-swipe-to-delete-in-recyclerview
@@ -126,11 +144,55 @@ class ItemListFragment : Fragment() {
         viewModel.retrieveUnreadItemsInFeeds(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { items ->
             items.let {
                 adapter.submitList(it)
+                currentList = it
             }
         }
 
         binding.floatingActionButton.setOnClickListener {
             refresh()
+        }
+
+
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater: MenuInflater = requireActivity().menuInflater
+        inflater.inflate(R.menu.fragment_item_list, menu)
+    }
+
+    // If above is true, will go backwards; otherwise forwards.
+    private fun bulkMarkRead(above: Boolean) {
+        if (currentList.isNotEmpty() && longClickedPosition >= 0) {
+            // Log.i("ItemListFragment", "$longClickedPosition, ${currentList.size}")
+            var range = longClickedPosition+1 until currentList.size
+            if (above) {
+                range = 0 until longClickedPosition
+            }
+            for (i in range) {
+                viewModel.markItemRead(currentList[i].postId, currentList[i].feedId)
+            }
+        }
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.toggle_read -> {
+                viewModel.toggleItemRead(longClickedPostId, longClickedFeedId)
+                true
+            }
+
+            R.id.mark_above_read -> {
+                bulkMarkRead(true)
+                true
+            }
+            R.id.mark_below_read -> {
+                bulkMarkRead(false)
+                true
+            }
+
+            else -> super.onContextItemSelected(item)
         }
     }
 }

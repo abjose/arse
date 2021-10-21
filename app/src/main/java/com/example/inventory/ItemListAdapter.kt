@@ -36,7 +36,7 @@ import java.util.*
  * [ListAdapter] implementation for the recyclerview.
  */
 
-class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel, private val onItemClicked: (Int) -> Unit) :
+class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel, private val onItemClicked: (Int) -> Unit, private val onItemLongClicked: (postId: Int, feedId: Int, position: Int) -> Unit) :
     ListAdapter<Item, ItemListAdapter.ItemViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -54,6 +54,10 @@ class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
         val current = getItem(position)
         holder.itemView.setOnClickListener {
             onItemClicked(position)
+        }
+        holder.itemView.setOnLongClickListener {
+            onItemLongClicked(current.postId, current.feedId, position)
+            true
         }
         holder.bind(current)
         holder.itemView.setTag("postId".hashCode(), current.postId)

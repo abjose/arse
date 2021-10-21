@@ -2,17 +2,18 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <!-- "Mark Favorite", should appear as action button if possible -->
     <item
-        android:id="@+id/action_favorite"
-        android:icon="@android:drawable/ic_menu_view"
-        android:title="Favorite"
+        android:id="@+id/toggle_read"
+        android:title="Toggle Read"
         app:showAsAction="ifRoom" />
 
-    <!-- Settings, should always be in the overflow -->
     <item
-        android:id="@+id/action_settings"
-        android:title="Settings"
-        app:showAsAction="never" />
+        android:id="@+id/mark_above_read"
+        android:title="Mark Above as Read"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/mark_below_read"
+        android:title="Mark Below as Read"
+        app:showAsAction="ifRoom" />
 
 </menu>

@@ -37,6 +37,11 @@ interface ItemDao {
     // uhh
     @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_id = :feedId")
     suspend fun markRead(postId: Int, feedId: Int)
+    @Query("UPDATE item SET read = 0 WHERE post_id = :postId AND feed_id = :feedId")
+    suspend fun markUnread(postId: Int, feedId: Int)
+
+    @Query("UPDATE item SET read = NOT read WHERE post_id = :postId AND feed_id = :feedId")
+    suspend fun toggleRead(postId: Int, feedId: Int)
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.

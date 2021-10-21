@@ -22,6 +22,7 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.example.inventory.databinding.ItemPagerBinding
@@ -45,11 +46,15 @@ class ViewPagerFragment : Fragment() {
     private var skipListRefresh: Boolean = false
     private var positionSet: Boolean = false
 
+    // Save current item state.
+    private var currentPostId: Int = 0
+    private var currentPostFeedId: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         (activity as AppCompatActivity).supportActionBar!!.isHideOnContentScrollEnabled = true
 
         super.onCreate(savedInstanceState)
-        // setHasOptionsMenu(true)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -69,13 +74,14 @@ class ViewPagerFragment : Fragment() {
         Log.i("ViewPager", "position: $position")
 
         val adapter = ViewPagerAdapter(this.requireContext()) { postId, feedId ->
-            // Log.i("ViewPager", "Looking at $postId, $positionSet")
             if (positionSet) {
-                // Log.i("ViewPager", "marking post $postId read")
-                viewModel.markItemRead(postId, feedId)
+                Log.i("ViewPager", "updating item state: $postId, $feedId")
+                currentPostId = postId
+                currentPostFeedId = feedId
+                markCurrentItemRead()
             }
         }
-        // viewpager_binding.viewPager.layout = LinearLayoutManager(this.context)
+
         binding.viewPager.adapter = adapter
         // binding.viewPager.offscreenPageLimit = 3
 
@@ -94,6 +100,36 @@ class ViewPagerFragment : Fragment() {
 //            )
 //            this.findNavController().navigate(action)
 //        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_view_pager, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.mark_unread -> {
+                Log.i("ViewPager", "hit mark unread button")
+                markCurrentItemUnread()
+                this.findNavController().navigateUp()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun markCurrentItemRead() {
+        if (positionSet) {
+            viewModel.markItemRead(currentPostId, currentPostFeedId)
+        }
+    }
+
+    private fun markCurrentItemUnread() {
+        if (positionSet) {
+            viewModel.markItemUnread(currentPostId, currentPostFeedId)
+        }
     }
 
     private fun setPosition(position: Int) {

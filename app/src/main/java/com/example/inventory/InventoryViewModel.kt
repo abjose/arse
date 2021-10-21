@@ -63,16 +63,16 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         viewModelScope.launch {
             itemDao.markRead(postId, feedId)
         }
-//        // val item = itemDao.getItem(id)
-//        val item = retrieveItem(id)
-//        item.
-//
-//        viewModelScope.launch {
-//            val item = itemDao.getItem(id)
-//
-//            val newItem = item.copy(read = true)
-//            updateItem(newItem)
-//        }
+    }
+    fun markItemUnread(postId: Int, feedId: Int) {
+        viewModelScope.launch {
+            itemDao.markUnread(postId, feedId)
+        }
+    }
+    fun toggleItemRead(postId: Int, feedId: Int) {
+        viewModelScope.launch {
+            itemDao.toggleRead(postId, feedId)
+        }
     }
 
     /**

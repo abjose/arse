@@ -42,10 +42,6 @@ class ViewPagerFragment : Fragment() {
     private val binding get() = _binding!!
     private val navigationArgs: ViewPagerFragmentArgs by navArgs()
 
-    // Prevent ViewPager list from updating once we've sent it out.
-    private var skipListRefresh: Boolean = false
-    private var positionSet: Boolean = false
-
     // Save current item state.
     private var currentPostId: Int = 0
     private var currentPostFeedId: Int = 0
@@ -74,12 +70,10 @@ class ViewPagerFragment : Fragment() {
         Log.i("ViewPager", "position: $position")
 
         val adapter = ViewPagerAdapter(this.requireContext()) { postId, feedId ->
-            if (positionSet) {
-                Log.i("ViewPager", "updating item state: $postId, $feedId")
-                currentPostId = postId
-                currentPostFeedId = feedId
-                markCurrentItemRead()
-            }
+            Log.i("ViewPager", "updating item state: $postId, $feedId")
+            currentPostId = postId
+            currentPostFeedId = feedId
+            markCurrentItemRead()
         }
 
         binding.viewPager.adapter = adapter
@@ -92,7 +86,8 @@ class ViewPagerFragment : Fragment() {
             }
         })
 
-        loadFeeds(adapter)
+        adapter.submitList(navigationArgs.posts.toList())
+        setPosition(position)
 
 //        binding.floatingActionButton.setOnClickListener {
 //            val action = ItemListFragmentDirections.actionItemListFragmentToAddItemFragment(
@@ -121,35 +116,17 @@ class ViewPagerFragment : Fragment() {
     }
 
     private fun markCurrentItemRead() {
-        if (positionSet) {
-            viewModel.markItemRead(currentPostId, currentPostFeedId)
-        }
+        viewModel.markItemRead(currentPostId, currentPostFeedId)
     }
 
     private fun markCurrentItemUnread() {
-        if (positionSet) {
-            viewModel.markItemUnread(currentPostId, currentPostFeedId)
-        }
+        viewModel.markItemUnread(currentPostId, currentPostFeedId)
     }
 
     private fun setPosition(position: Int) {
         Log.i("ViewPager", "setting position in adapter to $position")
-        positionSet = true
         if (position > 0) {
             binding.viewPager.setCurrentItem(position, false)
-        }
-    }
-
-    private fun loadFeeds(adapter: ViewPagerAdapter) {
-        viewModel.retrieveUnreadItemsInFeeds(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { items ->
-            if (!skipListRefresh) {
-                skipListRefresh = true
-                items.let {
-                    adapter.submitList(it)
-                }
-
-                setPosition(navigationArgs.itemPosition)
-            }
         }
     }
 
@@ -157,10 +134,6 @@ class ViewPagerFragment : Fragment() {
         super.onDestroyView()
 
         (activity as AppCompatActivity).supportActionBar!!.isHideOnContentScrollEnabled = false
-
         // binding.viewPager.unregisterOnPageChangeCallback(this)
-        Log.i("ViewPager", "destroyed")
-        skipListRefresh = false
-        positionSet = false
     }
 }

@@ -29,10 +29,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ItemDao {
 
-    @Query("SELECT * from item WHERE feed_id = :feedId AND read = 0 ORDER BY timestamp ASC")
-    fun getUnreadItemsInFeed(feedId: Int): Flow<List<Item>>
     @Query("SELECT * from item WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp ASC")
-    fun getUnreadItemsInFeeds(feedIds: IntArray): Flow<List<Item>>
+    fun getUnreadItemsInFeedsAsc(feedIds: IntArray): Flow<List<Item>>
+    @Query("SELECT * from item WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp DESC")
+    fun getUnreadItemsInFeedsDesc(feedIds: IntArray): Flow<List<Item>>
+    @Query("SELECT * from item WHERE feed_id IN (:feedIds) ORDER BY timestamp ASC")
+    fun getItemsInFeedsAsc(feedIds: IntArray): Flow<List<Item>>
+    @Query("SELECT * from item WHERE feed_id IN (:feedIds) ORDER BY timestamp DESC")
+    fun getItemsInFeedsDesc(feedIds: IntArray): Flow<List<Item>>
 
     // uhh
     @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_id = :feedId")

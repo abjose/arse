@@ -124,11 +124,20 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         return feedDao.getFeed(feedId).asLiveData()
     }
 
-    fun retrieveUnreadItemsInFeed(feedId: Int): LiveData<List<Item>> {
-        return itemDao.getUnreadItemsInFeed(feedId).asLiveData()
-    }
-    fun retrieveUnreadItemsInFeeds(feedIds: IntArray): LiveData<List<Item>> {
-        return itemDao.getUnreadItemsInFeeds(feedIds).asLiveData()
+    fun retrieveItemsInFeeds(feedIds: IntArray, include_read: Boolean = false, ascending: Boolean = true): LiveData<List<Item>> {
+        return if (include_read) {
+            if (ascending) {
+                itemDao.getItemsInFeedsAsc(feedIds).asLiveData()
+            } else {
+                itemDao.getItemsInFeedsDesc(feedIds).asLiveData()
+            }
+        } else {
+            if (ascending) {
+                itemDao.getUnreadItemsInFeedsAsc(feedIds).asLiveData()
+            } else {
+                itemDao.getUnreadItemsInFeedsDesc(feedIds).asLiveData()
+            }
+        }
     }
 
     /**

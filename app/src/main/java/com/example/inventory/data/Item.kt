@@ -15,9 +15,12 @@
  */
 package com.example.inventory.data
 
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.android.parcel.Parcelize
 import java.text.NumberFormat
 import java.time.LocalDateTime
 
@@ -48,7 +51,44 @@ data class Item(
 
     @ColumnInfo(name = "read")
     val read: Boolean,
-)
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readString() ?: "title",
+        parcel.readString() ?: "author",
+        parcel.readString() ?: "parcel",
+        parcel.readLong() ?: 0,
+        parcel.readString() ?: "content",
+        parcel.readByte() != 0.toByte()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(feedId)
+        parcel.writeInt(postId)
+        parcel.writeString(title)
+        parcel.writeString(author)
+        parcel.writeString(link)
+        parcel.writeLong(timestamp)
+        parcel.writeString(content)
+        parcel.writeByte(if (read) 1 else 0)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Item> {
+        override fun createFromParcel(parcel: Parcel): Item {
+            return Item(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Item?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 
 ///**
 // * Returns the passed in price in currency format.

@@ -49,6 +49,9 @@ class ItemListFragment : Fragment() {
     private val na = NetworkActivity()
     private val navigationArgs: ItemListFragmentArgs by navArgs()
 
+    private var viewRead: Boolean = false
+    private var sortAscending: Boolean = true
+
     // State for handling context menu choices.
     private var longClickedPostId: Int = 0
     private var longClickedFeedId: Int = 0
@@ -59,6 +62,7 @@ class ItemListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // registerForContextMenu(recyclerView)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -85,7 +89,7 @@ class ItemListFragment : Fragment() {
 
         // RecyclerView
         val adapter = ItemListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
-            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedIds)
+            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedIds, currentList.toTypedArray())
             this.findNavController().navigate(action)
 
         }, { postId: Int, feedId: Int, position: Int ->
@@ -139,27 +143,50 @@ class ItemListFragment : Fragment() {
             }
         }
 
-        // Attach an observer on the allItems list to update the UI automatically when the data
-        // changes.
-        viewModel.retrieveUnreadItemsInFeeds(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { items ->
-            items.let {
-                adapter.submitList(it)
-                currentList = it
-            }
-        }
+        observeData()
 
         binding.floatingActionButton.setOnClickListener {
             refresh()
         }
+    }
 
+    fun observeData() {
+        // Simpler way to clear existing observers?
+        viewModel.retrieveItemsInFeeds(navigationArgs.feedIds).removeObservers(this.viewLifecycleOwner)
+        viewModel.retrieveItemsInFeeds(navigationArgs.feedIds, include_read = viewRead, ascending = sortAscending).observe(this.viewLifecycleOwner) { items ->
+            items.let {
+                (binding.recyclerView.adapter as ItemListAdapter).submitList(it)
+                currentList = it
+            }
+        }
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_item_list_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.toggle_view_read -> {
+                viewRead = !viewRead
+                observeData()
+                true
+            }
+            R.id.toggle_ascending -> {
+                sortAscending = !sortAscending
+                observeData()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onCreateContextMenu(
         menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         val inflater: MenuInflater = requireActivity().menuInflater
-        inflater.inflate(R.menu.fragment_item_list, menu)
+        inflater.inflate(R.menu.fragment_item_list_context, menu)
     }
 
     // If above is true, will go backwards; otherwise forwards.
@@ -185,10 +212,12 @@ class ItemListFragment : Fragment() {
 
             R.id.mark_above_read -> {
                 bulkMarkRead(true)
+                observeData()
                 true
             }
             R.id.mark_below_read -> {
                 bulkMarkRead(false)
+                observeData()
                 true
             }
 

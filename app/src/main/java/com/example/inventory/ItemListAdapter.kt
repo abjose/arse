@@ -19,14 +19,13 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inventory.data.Item
 import com.example.inventory.databinding.ItemListItemBinding
-import kotlinx.coroutines.coroutineScope
 import org.jsoup.Jsoup
 import java.lang.Integer.min
 import java.text.SimpleDateFormat
@@ -89,6 +88,12 @@ class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
             binding.itemDescription.text = ssb
             // binding.itemDescription.ellipsize = TextUtils.TruncateAt.END
             // binding.itemName.isSingleLine = true
+
+            if (item.read) {
+                binding.readView.visibility = View.VISIBLE
+            } else {
+                binding.readView.visibility = View.GONE
+            }
         }
     }
 

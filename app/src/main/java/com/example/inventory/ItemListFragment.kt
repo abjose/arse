@@ -108,7 +108,6 @@ class ItemListFragment : Fragment() {
 
         // Move this stuff somewhere else
         // https://stackoverflow.com/questions/49827752/how-to-implement-drag-and-drop-and-swipe-to-delete-in-recyclerview
-        val fragmentLifecycleOwner = this.viewLifecycleOwner
         val itemTouchHelperCallback =
             object :
                 ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {

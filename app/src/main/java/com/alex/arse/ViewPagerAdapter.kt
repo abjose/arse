@@ -1,4 +1,4 @@
-package com.example.inventory
+package com.alex.arse
 
 import android.content.Context
 import android.content.Intent
@@ -11,8 +11,8 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventory.data.Post
-import com.example.inventory.databinding.PagerDetailBinding
+import com.alex.arse.data.Post
+import com.alex.arse.databinding.PagerDetailBinding
 import java.text.SimpleDateFormat
 import java.util.*
 

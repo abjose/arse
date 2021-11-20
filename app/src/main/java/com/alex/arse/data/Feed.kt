@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.inventory
+package com.alex.arse.data
 
-import android.app.Application
-import com.example.inventory.data.ArseRoomDatabase
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
+@Entity
+data class Feed(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
 
-class ArseApplication : Application() {
-    // Using by lazy so the database is only created when needed
-    // rather than when the application starts
-    val database: ArseRoomDatabase by lazy { ArseRoomDatabase.getDatabase(this) }
-}
+    @ColumnInfo(name = "url")
+    val url: String,
+    @ColumnInfo(name = "name")
+    val name: String,
+
+    @ColumnInfo(name = "html_url")
+    val htmlUrl: String,
+    // TODO: switch to a more relational way of storing tags?
+    @ColumnInfo(name = "category")
+    val category: String,
+)

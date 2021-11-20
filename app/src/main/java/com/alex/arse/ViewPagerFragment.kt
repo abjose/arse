@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.inventory
+package com.alex.arse
 
 import android.os.Bundle
 import android.util.Log
@@ -25,7 +25,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
-import com.example.inventory.databinding.ItemPagerBinding
+import com.alex.arse.databinding.ItemPagerBinding
 
 /**
  * Main fragment displaying details for all items in the database.

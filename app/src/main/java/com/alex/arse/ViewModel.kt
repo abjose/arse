@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.example.inventory
+package com.alex.arse
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.inventory.data.Feed
-import com.example.inventory.data.FeedDao
-import com.example.inventory.data.Post
-import com.example.inventory.data.PostDao
+import com.alex.arse.data.Feed
+import com.alex.arse.data.FeedDao
+import com.alex.arse.data.Post
+import com.alex.arse.data.PostDao
 import kotlinx.coroutines.launch
 
 /**

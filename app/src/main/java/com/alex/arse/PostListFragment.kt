@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.inventory
+package com.alex.arse
 
 import android.os.Bundle
 import android.util.Log
@@ -27,8 +27,8 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventory.data.Post
-import com.example.inventory.databinding.FragmentPostListBinding
+import com.alex.arse.data.Post
+import com.alex.arse.databinding.FragmentPostListBinding
 import kotlinx.android.synthetic.main.fragment_post_list.*
 
 

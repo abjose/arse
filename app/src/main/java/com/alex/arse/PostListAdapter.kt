@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.inventory
+package com.alex.arse
 
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -24,8 +24,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventory.data.Post
-import com.example.inventory.databinding.ItemListItemBinding
+import com.alex.arse.data.Post
+import com.alex.arse.databinding.ItemListItemBinding
 import org.jsoup.Jsoup
 import java.lang.Integer.min
 import java.text.SimpleDateFormat

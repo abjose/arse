@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.inventory
+package com.alex.arse
 
 import android.os.Bundle
 import android.os.Parcelable
@@ -26,12 +26,11 @@ import android.widget.ExpandableListView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.inventory.data.Feed
-import com.example.inventory.databinding.FragmentFeedListBinding
+import com.alex.arse.data.Feed
+import com.alex.arse.databinding.FragmentFeedListBinding
 import java.util.*
 import kotlin.collections.ArrayList
 
-// import com.example.inventory.databinding.ItemPagerBinding
 
 /**
  * Main fragment displaying details for all items in the database.

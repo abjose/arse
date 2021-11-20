@@ -1,6 +1,6 @@
-package com.example.inventory
+package com.alex.arse
 
-import com.example.inventory.data.Feed
+import com.alex.arse.data.Feed
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory

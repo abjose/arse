@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.inventory
+package com.alex.arse
 
 import android.app.Activity
 import android.content.Context.INPUT_METHOD_SERVICE
@@ -31,8 +31,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.example.inventory.data.Feed
-import com.example.inventory.databinding.FragmentEditFeedBinding
+import com.alex.arse.data.Feed
+import com.alex.arse.databinding.FragmentEditFeedBinding
 
 /**
  * Fragment to add or update a feed in the Inventory database.

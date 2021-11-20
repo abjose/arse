@@ -1,4 +1,4 @@
-package com.example.inventory
+package com.alex.arse
 
 import android.content.Context
 import android.graphics.Typeface
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.example.inventory.data.Feed
+import com.alex.arse.data.Feed
 import java.util.*
 import kotlin.collections.ArrayList
 

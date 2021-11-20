@@ -1,10 +1,10 @@
-package com.example.inventory
+package com.alex.arse
 
 import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.example.inventory.data.Post
+import com.alex.arse.data.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

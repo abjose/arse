@@ -408,7 +408,16 @@ class NetworkActivity : Activity() {
         var url = initialUrl
         for (i in 1..10) {
             val connection = URL(url).openConnection() as HttpURLConnection
-            val code = connection.responseCode
+
+            var code: Int
+            try {
+                // For some reason this is crashing if page doesn't exist.
+                code = connection.responseCode
+            } catch (e: Exception) {
+                Log.i(TAG, "Can't read responseCode? Page probably doesn't exist.")
+                return null
+            }
+
             if (code == HTTP_MOVED_PERM || code == HTTP_MOVED_TEMP || code == HTTP_SEE_OTHER) {
                 url = connection.getHeaderField("Location")
                 Log.i(TAG, "redirecting to $url")

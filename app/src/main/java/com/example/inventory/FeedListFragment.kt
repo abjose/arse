@@ -39,8 +39,8 @@ import kotlin.collections.ArrayList
 class FeedListFragment : Fragment() {
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao(),
-            (activity?.application as InventoryApplication).database.feedDao()
+            (activity?.application as ArseApplication).database.postDao(),
+            (activity?.application as ArseApplication).database.feedDao()
         )
     }
 
@@ -90,7 +90,7 @@ class FeedListFragment : Fragment() {
 
             val keys = ArrayList(feedCategoryMap.keys)
             val feed = feedCategoryMap[keys[groupPosition]]!![childPosition]
-            val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(intArrayOf(feed.id), arrayOf(feed.url))
+            val action = FeedListFragmentDirections.actionFeedListFragmentToPostListFragment(intArrayOf(feed.id), arrayOf(feed.url))
             this.findNavController().navigate(action)
 
             false
@@ -160,7 +160,7 @@ class FeedListFragment : Fragment() {
             feedUrls[i] = feeds[i].url
         }
 
-        val action = FeedListFragmentDirections.actionFeedListFragmentToItemListFragment(feedIds, feedUrls)
+        val action = FeedListFragmentDirections.actionFeedListFragmentToPostListFragment(feedIds, feedUrls)
         this.findNavController().navigate(action)
     }
 

@@ -27,34 +27,34 @@ import kotlinx.coroutines.flow.Flow
  * Database access object to access the Inventory database
  */
 @Dao
-interface ItemDao {
+interface PostDao {
 
-    @Query("SELECT * from item WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp ASC")
-    fun getUnreadItemsInFeedsAsc(feedIds: IntArray): Flow<List<Item>>
-    @Query("SELECT * from item WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp DESC")
-    fun getUnreadItemsInFeedsDesc(feedIds: IntArray): Flow<List<Item>>
-    @Query("SELECT * from item WHERE feed_id IN (:feedIds) ORDER BY timestamp ASC")
-    fun getItemsInFeedsAsc(feedIds: IntArray): Flow<List<Item>>
-    @Query("SELECT * from item WHERE feed_id IN (:feedIds) ORDER BY timestamp DESC")
-    fun getItemsInFeedsDesc(feedIds: IntArray): Flow<List<Item>>
+    @Query("SELECT * from post WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp ASC")
+    fun getUnreadItemsInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
+    @Query("SELECT * from post WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp DESC")
+    fun getUnreadItemsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
+    @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp ASC")
+    fun getItemsInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
+    @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp DESC")
+    fun getItemsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
 
     // uhh
-    @Query("UPDATE item SET read = 1 WHERE post_id = :postId AND feed_id = :feedId")
+    @Query("UPDATE post SET read = 1 WHERE post_id = :postId AND feed_id = :feedId")
     suspend fun markRead(postId: Int, feedId: Int)
-    @Query("UPDATE item SET read = 0 WHERE post_id = :postId AND feed_id = :feedId")
+    @Query("UPDATE post SET read = 0 WHERE post_id = :postId AND feed_id = :feedId")
     suspend fun markUnread(postId: Int, feedId: Int)
 
-    @Query("UPDATE item SET read = NOT read WHERE post_id = :postId AND feed_id = :feedId")
+    @Query("UPDATE post SET read = NOT read WHERE post_id = :postId AND feed_id = :feedId")
     suspend fun toggleRead(postId: Int, feedId: Int)
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing Item into the database Room ignores the conflict.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(item: Item)
+    suspend fun insert(post: Post)
 
     @Update
-    suspend fun update(item: Item)
+    suspend fun update(post: Post)
 
     @Delete
-    suspend fun delete(item: Item)
+    suspend fun delete(post: Post)
 }

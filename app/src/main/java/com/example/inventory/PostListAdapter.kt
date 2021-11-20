@@ -24,7 +24,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventory.data.Item
+import com.example.inventory.data.Post
 import com.example.inventory.databinding.ItemListItemBinding
 import org.jsoup.Jsoup
 import java.lang.Integer.min
@@ -35,8 +35,8 @@ import java.util.*
  * [ListAdapter] implementation for the recyclerview.
  */
 
-class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel, private val onItemClicked: (Int) -> Unit, private val onItemLongClicked: (postId: Int, feedId: Int, position: Int) -> Unit) :
-    ListAdapter<Item, ItemListAdapter.ItemViewHolder>(DiffCallback) {
+class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel, private val onItemClicked: (Int) -> Unit, private val onItemLongClicked: (postId: Int, feedId: Int, position: Int) -> Unit) :
+    ListAdapter<Post, PostListAdapter.ItemViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         Log.i("ItemListAdapter", "parent: ${parent.toString()}, ${parent.width}, ${parent.height}")
@@ -66,30 +66,30 @@ class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
     class ItemViewHolder(private var binding: ItemListItemBinding, private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Item) {
-            binding.itemAuthor.text = item.author
+        fun bind(post: Post) {
+            binding.itemAuthor.text = post.author
             if (isMultiFeed) {
-                viewModel.retrieveFeedAndRunCallback(item.feedId) { feed ->
-                    if (feed.name != item.author) {
-                        if (item.author.isBlank()) {
+                viewModel.retrieveFeedAndRunCallback(post.feedId) { feed ->
+                    if (feed.name != post.author) {
+                        if (post.author.isBlank()) {
                             binding.itemAuthor.text = "${feed.name}"
                         } else {
-                            binding.itemAuthor.text = "${item.author} (${feed.name})"
+                            binding.itemAuthor.text = "${post.author} (${feed.name})"
                         }
                     }
                 }
             }
             val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
-            binding.itemDate.text = sdf.format(Date(item.timestamp))
+            binding.itemDate.text = sdf.format(Date(post.timestamp))
 
-            val contentString = Jsoup.parse(item.content).text()
-            val ssb = SpannableStringBuilder("${item.title} -  ${contentString.subSequence(0, min(200, contentString.length))}")
-            ssb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, item.title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            val contentString = Jsoup.parse(post.content).text()
+            val ssb = SpannableStringBuilder("${post.title} -  ${contentString.subSequence(0, min(200, contentString.length))}")
+            ssb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, post.title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             binding.itemDescription.text = ssb
             // binding.itemDescription.ellipsize = TextUtils.TruncateAt.END
             // binding.itemName.isSingleLine = true
 
-            if (item.read) {
+            if (post.read) {
                 binding.readView.visibility = View.VISIBLE
             } else {
                 binding.readView.visibility = View.GONE
@@ -98,13 +98,13 @@ class ItemListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
     }
 
     companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<Item>() {
-            override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
-                return oldItem === newItem
+        private val DiffCallback = object : DiffUtil.ItemCallback<Post>() {
+            override fun areItemsTheSame(oldPost: Post, newPost: Post): Boolean {
+                return oldPost === newPost
             }
 
-            override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
-                return oldItem.postId == newItem.postId
+            override fun areContentsTheSame(oldPost: Post, newPost: Post): Boolean {
+                return oldPost.postId == newPost.postId
             }
         }
     }

@@ -1,21 +1,11 @@
 package com.example.inventory
 
-import android.app.Activity
-import android.util.Log
 import com.example.inventory.data.Feed
-import com.example.inventory.data.Item
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.io.InputStream
-import java.net.URL
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.*
 
 // We don't use namespaces
 private val ns: String? = null

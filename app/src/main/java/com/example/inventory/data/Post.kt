@@ -19,16 +19,12 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
-import kotlinx.android.parcel.Parcelize
-import java.text.NumberFormat
-import java.time.LocalDateTime
 
 /**
  * Entity data class represents a single row in the database.
  */
 @Entity(primaryKeys=["feed_id", "post_id"])
-data class Item(
+data class Post(
     // @PrimaryKey(autoGenerate = true)
     // val id: Int = 0,
 
@@ -79,12 +75,12 @@ data class Item(
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<Item> {
-        override fun createFromParcel(parcel: Parcel): Item {
-            return Item(parcel)
+    companion object CREATOR : Parcelable.Creator<Post> {
+        override fun createFromParcel(parcel: Parcel): Post {
+            return Post(parcel)
         }
 
-        override fun newArray(size: Int): Array<Item?> {
+        override fun newArray(size: Int): Array<Post?> {
             return arrayOfNulls(size)
         }
     }

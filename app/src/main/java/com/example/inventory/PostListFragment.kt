@@ -27,27 +27,26 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventory.data.Item
-import com.example.inventory.databinding.FragmentItemListBinding
-import kotlinx.android.synthetic.main.fragment_item_list.*
+import com.example.inventory.data.Post
+import com.example.inventory.databinding.FragmentPostListBinding
+import kotlinx.android.synthetic.main.fragment_post_list.*
 
-// import com.example.inventory.databinding.ItemPagerBinding
 
 /**
  * Main fragment displaying details for all items in the database.
  */
-class ItemListFragment : Fragment() {
+class PostListFragment : Fragment() {
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao(),
-            (activity?.application as InventoryApplication).database.feedDao()
+            (activity?.application as ArseApplication).database.postDao(),
+            (activity?.application as ArseApplication).database.feedDao()
         )
     }
 
-    private var _binding: FragmentItemListBinding? = null
+    private var _binding: FragmentPostListBinding? = null
     private val binding get() = _binding!!
     private val na = NetworkActivity()
-    private val navigationArgs: ItemListFragmentArgs by navArgs()
+    private val navigationArgs: PostListFragmentArgs by navArgs()
 
     private var viewRead: Boolean = false
     private var sortAscending: Boolean = true
@@ -57,7 +56,7 @@ class ItemListFragment : Fragment() {
     private var longClickedFeedId: Int = 0
     private var longClickedPosition: Int = -1
 
-    private var currentList: List<Item> = listOf()
+    private var currentList: List<Post> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +69,7 @@ class ItemListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentItemListBinding.inflate(inflater, container, false)
+        _binding = FragmentPostListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -78,8 +77,9 @@ class ItemListFragment : Fragment() {
         // Toast.makeText(this.requireContext(), "Failed to load feed URL" , Toast.LENGTH_SHORT).show()
 
         swipe_refresh.isRefreshing = true
+        Log.d("ItemListFragment", "entering FeedParser")
         na.loadFeed(navigationArgs.feedIds, navigationArgs.feedUrls, this.requireContext(), viewModel) {
-            Log.i("ItemListFragment", "refresh is done")
+            Log.d("ItemListFragment", "refresh is done")
             swipe_refresh.isRefreshing = false
         }
     }
@@ -88,8 +88,8 @@ class ItemListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // RecyclerView
-        val adapter = ItemListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
-            val action = ItemListFragmentDirections.actionItemListFragmentToViewPagerFragment(position, navigationArgs.feedIds, currentList.toTypedArray())
+        val adapter = PostListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
+            val action = PostListFragmentDirections.actionPostListFragmentToViewPagerFragment(position, navigationArgs.feedIds, currentList.toTypedArray())
             this.findNavController().navigate(action)
 
         }, { postId: Int, feedId: Int, position: Int ->
@@ -154,7 +154,7 @@ class ItemListFragment : Fragment() {
         viewModel.retrieveItemsInFeeds(navigationArgs.feedIds).removeObservers(this.viewLifecycleOwner)
         viewModel.retrieveItemsInFeeds(navigationArgs.feedIds, include_read = viewRead, ascending = sortAscending).observe(this.viewLifecycleOwner) { items ->
             items.let {
-                (binding.recyclerView.adapter as ItemListAdapter).submitList(it)
+                (binding.recyclerView.adapter as PostListAdapter).submitList(it)
                 currentList = it
             }
         }

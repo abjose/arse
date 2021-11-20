@@ -23,16 +23,15 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.inventory.data.Feed
 import com.example.inventory.data.FeedDao
-import com.example.inventory.data.Item
-import com.example.inventory.data.ItemDao
+import com.example.inventory.data.Post
+import com.example.inventory.data.PostDao
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.Flow
 
 /**
  * View Model to keep a reference to the Inventory repository and an up-to-date list of all items.
  *
  */
-class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: FeedDao) : ViewModel() {
+class InventoryViewModel(private val itemDao: PostDao, private val feedDao: FeedDao) : ViewModel() {
 
     val allFeeds: LiveData<List<Feed>> = feedDao.getFeeds().asLiveData()
 
@@ -82,9 +81,9 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
 //        val newItem = getNewItemEntry(postId, title, author, feedName, link, timestamp, content)
 //        insertItem(newItem)
 //    }
-    fun addNewItem(item: Item) {
+    fun addNewItem(post: Post) {
         // Will ignore if have matching (feed name + post ID) entity
-        insertItem(item)
+        insertItem(post)
     }
     fun addNewFeed(feed: Feed) {
         insertFeed(feed)
@@ -97,9 +96,9 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     /**
      * Launching a new coroutine to insert an item in a non-blocking way
      */
-    private fun insertItem(item: Item) {
+    private fun insertItem(post: Post) {
         viewModelScope.launch {
-            itemDao.insert(item)
+            itemDao.insert(post)
         }
     }
     private fun insertFeed(feed: Feed) {
@@ -124,7 +123,7 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
         return feedDao.getFeed(feedId).asLiveData()
     }
 
-    fun retrieveItemsInFeeds(feedIds: IntArray, include_read: Boolean = false, ascending: Boolean = true): LiveData<List<Item>> {
+    fun retrieveItemsInFeeds(feedIds: IntArray, include_read: Boolean = false, ascending: Boolean = true): LiveData<List<Post>> {
         return if (include_read) {
             if (ascending) {
                 itemDao.getItemsInFeedsAsc(feedIds).asLiveData()
@@ -151,7 +150,7 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
     }
 
     /**
-     * Returns an instance of the [Item] entity class with the item info entered by the user.
+     * Returns an instance of the [Post] entity class with the item info entered by the user.
      * This will be used to add a new entry to the Inventory database.
      */
     private fun getNewFeedEntry(url: String, name: String, htmlUrl: String, category: String): Feed {
@@ -177,7 +176,7 @@ class InventoryViewModel(private val itemDao: ItemDao, private val feedDao: Feed
 /**
  * Factory class to instantiate the [ViewModel] instance.
  */
-class InventoryViewModelFactory(private val itemDao: ItemDao, private val feedDao: FeedDao) : ViewModelProvider.Factory {
+class InventoryViewModelFactory(private val itemDao: PostDao, private val feedDao: FeedDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

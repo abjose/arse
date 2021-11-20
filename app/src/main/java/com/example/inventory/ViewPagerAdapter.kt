@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventory.data.Item
+import com.example.inventory.data.Post
 import com.example.inventory.databinding.PagerDetailBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,7 +22,7 @@ import java.util.*
 
 // Helpful page for setting up ViewPager: https://g403.co/android-viewpager2/
 class ViewPagerAdapter(private val context: Context, private val updateCurrentPost: (postId: Int, feedId: Int) -> Unit) :
-    ListAdapter<Item, ViewPagerAdapter.ItemDetailViewHolder>(DiffCallback) {
+    ListAdapter<Post, ViewPagerAdapter.ItemDetailViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemDetailViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -48,15 +48,15 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
     class ItemDetailViewHolder(private var binding: PagerDetailBinding, private val context: Context) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Item) {
-            binding.itemName.text = item.title
-            binding.itemAuthor.text = item.author
+        fun bind(post: Post) {
+            binding.itemName.text = post.title
+            binding.itemAuthor.text = post.author
 
             val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm")
-            binding.itemDate.text = sdf.format(Date(item.timestamp))
+            binding.itemDate.text = sdf.format(Date(post.timestamp))
 
             binding.itemName.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.link))
                 startActivity(context, browserIntent, null)
             }
 
@@ -65,7 +65,7 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
             // binding.content.settings.loadWithOverviewMode = true
             // binding.content.settings.useWideViewPort = true
             val imageCss = "<style>img{display: inline;height: auto;width: auto;max-width: 100%;}</style>"
-            binding.content.loadDataWithBaseURL(null, imageCss + item.content,"text/html", "UTF-8", null)
+            binding.content.loadDataWithBaseURL(null, imageCss + post.content,"text/html", "UTF-8", null)
 
             binding.content.setOnLongClickListener {
                 val result = (it as WebView).hitTestResult
@@ -90,14 +90,14 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
     }
 
     companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<Item>() {
-            override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
-                return oldItem === newItem
+        private val DiffCallback = object : DiffUtil.ItemCallback<Post>() {
+            override fun areItemsTheSame(oldPost: Post, newPost: Post): Boolean {
+                return oldPost === newPost
             }
 
-            override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
+            override fun areContentsTheSame(oldPost: Post, newPost: Post): Boolean {
                 // return oldItem.postId == newItem.postId && oldItem.feedUrl == newItem.feedUrl
-                return oldItem.postId == newItem.postId
+                return oldPost.postId == newPost.postId
             }
         }
     }

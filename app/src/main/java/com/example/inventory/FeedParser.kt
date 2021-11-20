@@ -4,8 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.example.inventory.data.Feed
-import com.example.inventory.data.Item
+import com.example.inventory.data.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -15,6 +14,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.lang.Exception
 import java.lang.Math.min
 import java.net.HttpURLConnection
 import java.net.HttpURLConnection.*
@@ -34,7 +34,7 @@ class FeedParser(private val feedId: Int) {
     var TAG = "FeedParser"
 
     @Throws(XmlPullParserException::class, IOException::class)
-    fun parse(inputStream: InputStream): List<Item> {
+    fun parse(inputStream: InputStream): List<Post> {
         inputStream.use { inputStream ->
             // get rid of leading whitespace :'(
             var inputAsString = inputStream.bufferedReader().use { it.readText() }
@@ -55,8 +55,8 @@ class FeedParser(private val feedId: Int) {
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readFeed(parser: XmlPullParser): List<Item> {
-        val entries = mutableListOf<Item>()
+    private fun readFeed(parser: XmlPullParser): List<Post> {
+        val entries = mutableListOf<Post>()
 
         // parser.require(XmlPullParser.START_TAG, ns, "feed")
         // while (parser.next() != XmlPullParser.END_TAG) {
@@ -84,7 +84,7 @@ class FeedParser(private val feedId: Int) {
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
     // to their respective "read" methods for processing. Otherwise, skips the tag.
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readEntry(parser: XmlPullParser): Item {
+    private fun readEntry(parser: XmlPullParser): Post {
         // parser.require(XmlPullParser.START_TAG, ns, "item")
         var title: String? = null
         var author: String? = null
@@ -168,7 +168,7 @@ class FeedParser(private val feedId: Int) {
             content = description
         }
 
-        return Item(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "",
+        return Post(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "",
             link = link ?: "", timestamp = timestamp!!, content = content ?: "", read = false)
     }
 
@@ -352,9 +352,9 @@ class NetworkActivity : Activity() {
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
     fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
-        // Log.i(TAG, "in LoadPage")
         assert(feedIds.size == feedUrls.size)
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
+            Log.i(TAG, "loading $1{feedIds.size} feed(s)")
             for (i in feedIds.indices) {
                 loadXmlFromNetwork(feedIds[i], feedUrls[i], context, viewModel, doneCallback)
             }
@@ -370,8 +370,9 @@ class NetworkActivity : Activity() {
     }
 
     private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
+        Log.i(TAG, "in loadXmlFromNetwork, loading $feedUrl")
         GlobalScope.launch(Dispatchers.IO) {
-            var entries: List<Item> = emptyList()
+            var entries: List<Post> = emptyList()
 
 //            entries = downloadUrl(feedUrl)?.use { stream ->
 //                FeedParser(feedId).parse(stream)

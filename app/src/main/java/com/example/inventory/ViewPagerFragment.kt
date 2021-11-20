@@ -33,8 +33,8 @@ import com.example.inventory.databinding.ItemPagerBinding
 class ViewPagerFragment : Fragment() {
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao(),
-            (activity?.application as InventoryApplication).database.feedDao()
+            (activity?.application as ArseApplication).database.postDao(),
+            (activity?.application as ArseApplication).database.feedDao()
         )
     }
 
@@ -66,7 +66,7 @@ class ViewPagerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // val id = navigationArgs.itemId
-        val position = navigationArgs.itemPosition
+        val position = navigationArgs.postPosition
         Log.i("ViewPager", "position: $position")
 
         val adapter = ViewPagerAdapter(this.requireContext()) { postId, feedId ->

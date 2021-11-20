@@ -20,12 +20,12 @@
     app:startDestination="@id/feedListFragment">
 
     <fragment
-        android:id="@+id/itemListFragment"
-        android:name="com.example.inventory.ItemListFragment"
+        android:id="@+id/postListFragment"
+        android:name="com.example.inventory.PostListFragment"
         android:label=" "
-        tools:layout="@layout/fragment_item_list">
+        tools:layout="@layout/fragment_post_list">
         <action
-            android:id="@+id/action_itemListFragment_to_viewPagerFragment"
+            android:id="@+id/action_postListFragment_to_viewPagerFragment"
             app:destination="@id/viewPagerFragment" />
         <argument
             android:name="feed_ids"
@@ -38,22 +38,22 @@
         android:id="@+id/viewPagerFragment"
         android:name="com.example.inventory.ViewPagerFragment">
         <argument
-            android:name="item_position"
+            android:name="post_position"
             app:argType="integer" />
         <argument
             android:name="feed_ids"
             app:argType="integer[]" />
         <argument
             android:name="posts"
-            app:argType="com.example.inventory.data.Item[]" />
+            app:argType="com.example.inventory.data.Post[]" />
     </fragment>
     <fragment
         android:id="@+id/feedListFragment"
         android:name="com.example.inventory.FeedListFragment"
         android:label="@string/app_name">
         <action
-            android:id="@+id/action_feedListFragment_to_itemListFragment"
-            app:destination="@id/itemListFragment" />
+            android:id="@+id/action_feedListFragment_to_postListFragment"
+            app:destination="@id/postListFragment" />
         <action
             android:id="@+id/action_feedListFragment_to_editFeedFragment"
             app:destination="@id/editFeedFragment" />

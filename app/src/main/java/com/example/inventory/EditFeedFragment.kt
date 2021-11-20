@@ -43,8 +43,8 @@ class EditFeedFragment : Fragment() {
     // to share the ViewModel across fragments.
     private val viewModel: InventoryViewModel by activityViewModels {
         InventoryViewModelFactory(
-            (activity?.application as InventoryApplication).database.itemDao(),
-            (activity?.application as InventoryApplication).database.feedDao(),
+            (activity?.application as ArseApplication).database.postDao(),
+            (activity?.application as ArseApplication).database.feedDao(),
         )
     }
     private val navigationArgs: EditFeedFragmentArgs by navArgs()

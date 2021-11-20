@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -65,6 +66,26 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
             // binding.content.settings.useWideViewPort = true
             val imageCss = "<style>img{display: inline;height: auto;width: auto;max-width: 100%;}</style>"
             binding.content.loadDataWithBaseURL(null, imageCss + item.content,"text/html", "UTF-8", null)
+
+            binding.content.setOnLongClickListener {
+                val result = (it as WebView).hitTestResult
+                if (result.type == WebView.HitTestResult.ANCHOR_TYPE || result.type == WebView.HitTestResult.SRC_ANCHOR_TYPE) {
+                    // If target is link, try sharing.
+                    Log.v("WebView", "it's a link! " + result.extra)
+
+                    val shareIntent = Intent()
+                    shareIntent.action = Intent.ACTION_SEND
+                    shareIntent.type="text/plain"
+                    //shareIntent.type="text/html"
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, result.extra)
+                    startActivity(context, Intent.createChooser(shareIntent, "Share Link"), null)
+
+                    true
+                } else {
+                    // Otherwise, handle some other way
+                    false
+                }
+            }
         }
     }
 

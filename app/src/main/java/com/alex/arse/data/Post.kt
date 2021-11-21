@@ -19,11 +19,12 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 
 /**
  * Entity data class represents a single row in the database.
  */
-@Entity(primaryKeys=["feed_id", "post_id"])
+@Entity(primaryKeys=["feed_id", "post_id"], indices = [Index(value = ["feed_id", "post_id"])])
 data class Post(
     // @PrimaryKey(autoGenerate = true)
     // val id: Int = 0,

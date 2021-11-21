@@ -17,9 +17,10 @@ package com.alex.arse.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(indices = [Index(value = ["id"])])
 data class Feed(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

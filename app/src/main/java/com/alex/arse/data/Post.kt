@@ -43,6 +43,11 @@ data class Post(
     val link: String,
     @ColumnInfo(name = "timestamp")
     val timestamp: Long,
+
+    // Short summary of content in plaintext
+    @ColumnInfo(name = "description")
+    val description: String,
+    // Full content, likely html
     @ColumnInfo(name = "content")
     val content: String,
 
@@ -56,6 +61,7 @@ data class Post(
         parcel.readString() ?: "author",
         parcel.readString() ?: "parcel",
         parcel.readLong() ?: 0,
+        parcel.readString() ?: "description",
         parcel.readString() ?: "content",
         parcel.readByte() != 0.toByte()
     ) {
@@ -68,6 +74,7 @@ data class Post(
         parcel.writeString(author)
         parcel.writeString(link)
         parcel.writeLong(timestamp)
+        parcel.writeString(description)
         parcel.writeString(content)
         parcel.writeByte(if (read) 1 else 0)
     }

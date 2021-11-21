@@ -8,6 +8,7 @@ import com.alex.arse.data.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jsoup.Jsoup
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
@@ -88,10 +89,10 @@ class FeedParser(private val feedId: Int) {
         // parser.require(XmlPullParser.START_TAG, ns, "item")
         var title: String? = null
         var author: String? = null
-        var description: String? = null
         var link: String? = null
         var postId: Int? = null
         var timestamp: Long? = 0
+        var description: String? = null
         var content: String? = null
 
         val startDepth = parser.depth
@@ -103,9 +104,9 @@ class FeedParser(private val feedId: Int) {
                 "id" -> postId = readId(parser)
                 "title" -> title = readTitle(parser)
                 "author" -> author = readAuthor(parser)
-                "description" -> description = readDescription(parser)
                 "link" -> link = readLink(parser)
                 "pubDate" -> timestamp = readTimestamp(parser)
+                "description" -> description = readDescription(parser)
                 "content" -> content = readContent(parser, content)
                 else -> skip(parser)
             }
@@ -163,13 +164,23 @@ class FeedParser(private val feedId: Int) {
         if (postId == null) {
             postId = (title + timestamp.toString()).hashCode()
         }
+
         if (content == null && description != null) {
             Log.i(TAG, "Overwriting content")
             content = description
         }
 
+        if (content != null || description != null) {
+            var contentString = if (description != null) {
+                Jsoup.parse(description).text()
+            } else {
+                Jsoup.parse(content).text()
+            }
+            description = contentString.substring(0, Math.min(200, contentString.length))
+        }
+
         return Post(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "",
-            link = link ?: "", timestamp = timestamp!!, content = content ?: "", read = false)
+            link = link ?: "", timestamp = timestamp!!, description = description ?: "", content = content ?: "", read = false)
     }
 
     private fun simplifyTag(tag: String): String {

@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.alex.arse.data.Post
-import com.alex.arse.databinding.ItemListItemBinding
+import com.alex.arse.databinding.PostListItemBinding
 import org.jsoup.Jsoup
 import java.lang.Integer.min
 import java.text.SimpleDateFormat
@@ -35,13 +35,15 @@ import java.util.*
  * [ListAdapter] implementation for the recyclerview.
  */
 
-class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel, private val onItemClicked: (Int) -> Unit, private val onItemLongClicked: (postId: Int, feedId: Int, position: Int) -> Unit) :
-    ListAdapter<Post, PostListAdapter.ItemViewHolder>(DiffCallback) {
+class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: ArseViewModel,
+                      private val onPostClicked: (Int) -> Unit,
+                      private val onPostLongClicked: (postId: Int, feedId: Int, position: Int) -> Unit) :
+    ListAdapter<Post, PostListAdapter.PostViewHolder>(DiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        Log.i("ItemListAdapter", "parent: ${parent.toString()}, ${parent.width}, ${parent.height}")
-        return ItemViewHolder(
-            ItemListItemBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
+        Log.i("PostListAdapter", "parent: ${parent.toString()}, ${parent.width}, ${parent.height}")
+        return PostViewHolder(
+            PostListItemBinding.inflate(
                 LayoutInflater.from(
                     parent.context
                 )
@@ -49,13 +51,13 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
         )
     }
 
-    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val current = getItem(position)
         holder.itemView.setOnClickListener {
-            onItemClicked(position)
+            onPostClicked(position)
         }
         holder.itemView.setOnLongClickListener {
-            onItemLongClicked(current.postId, current.feedId, position)
+            onPostLongClicked(current.postId, current.feedId, position)
             true
         }
         holder.bind(current)
@@ -63,30 +65,30 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
         holder.itemView.setTag("feedId".hashCode(), current.feedId)
     }
 
-    class ItemViewHolder(private var binding: ItemListItemBinding, private val isMultiFeed: Boolean, private val viewModel: InventoryViewModel) :
+    class PostViewHolder(private var binding: PostListItemBinding, private val isMultiFeed: Boolean, private val viewModel: ArseViewModel) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(post: Post) {
-            binding.itemAuthor.text = post.author
+            binding.postAuthor.text = post.author
             if (isMultiFeed) {
                 viewModel.retrieveFeedAndRunCallback(post.feedId) { feed ->
                     if (feed.name != post.author) {
                         if (post.author.isBlank()) {
-                            binding.itemAuthor.text = "${feed.name}"
+                            binding.postAuthor.text = "${feed.name}"
                         } else {
-                            binding.itemAuthor.text = "${post.author} (${feed.name})"
+                            binding.postAuthor.text = "${post.author} (${feed.name})"
                         }
                     }
                 }
             }
             val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
-            binding.itemDate.text = sdf.format(Date(post.timestamp))
+            binding.postDate.text = sdf.format(Date(post.timestamp))
 
             // TODO: excessive to parse the whole post here - maybe need to cache?
             val contentString = Jsoup.parse(post.content).text()
             val ssb = SpannableStringBuilder("${post.title} -  ${contentString.subSequence(0, min(200, contentString.length))}")
             ssb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, post.title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            binding.itemDescription.text = ssb
+            binding.postDescription.text = ssb
             // binding.itemDescription.ellipsize = TextUtils.TruncateAt.END
             // binding.itemName.isSingleLine = true
 
@@ -110,7 +112,7 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
         }
     }
 
-    fun onItemDismiss(position: Int) {
+    fun onPostDismiss(position: Int) {
         // items.removeAt(position)
         // actually remove from db? / mark as read
         // notifyItemRemoved(position)

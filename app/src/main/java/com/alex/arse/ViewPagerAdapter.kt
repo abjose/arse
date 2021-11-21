@@ -38,9 +38,9 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
     }
 
     fun onPostViewed(position: Int) {
-        val item = getItem(position)
-        Log.i("ViewPager", "onPostViewed: ${item.postId}")
-        updateCurrentPost(item.postId, item.feedId)
+        val post = getItem(position)
+        Log.i("ViewPager", "onPostViewed: ${post.postId}")
+        updateCurrentPost(post.postId, post.feedId)
     }
 
     override fun getItemViewType(position: Int) = R.layout.pager_detail
@@ -49,13 +49,13 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(post: Post) {
-            binding.itemName.text = post.title
-            binding.itemAuthor.text = post.author
+            binding.postName.text = post.title
+            binding.postAuthor.text = post.author
 
             val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm")
-            binding.itemDate.text = sdf.format(Date(post.timestamp))
+            binding.postDate.text = sdf.format(Date(post.timestamp))
 
-            binding.itemName.setOnClickListener {
+            binding.postName.setOnClickListener {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.link))
                 startActivity(context, browserIntent, null)
             }

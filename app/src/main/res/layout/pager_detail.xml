@@ -22,7 +22,7 @@
           />
 
       <TextView
-          android:id="@+id/item_name"
+          android:id="@+id/post_name"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:textAlignment="center"
@@ -30,7 +30,7 @@
           android:textSize="20sp" />
 
       <TextView
-          android:id="@+id/item_author"
+          android:id="@+id/post_author"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:textAlignment="center"
@@ -38,7 +38,7 @@
           android:textSize="20sp" />
 
       <TextView
-          android:id="@+id/item_date"
+          android:id="@+id/post_date"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:textAlignment="center"

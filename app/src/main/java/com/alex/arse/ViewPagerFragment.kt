@@ -25,24 +25,22 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
-import com.alex.arse.databinding.ItemPagerBinding
+import com.alex.arse.databinding.PostPagerBinding
 
-/**
- * Main fragment displaying details for all items in the database.
- */
+
 class ViewPagerFragment : Fragment() {
-    private val viewModel: InventoryViewModel by activityViewModels {
+    private val viewModel: ArseViewModel by activityViewModels {
         InventoryViewModelFactory(
             (activity?.application as ArseApplication).database.postDao(),
             (activity?.application as ArseApplication).database.feedDao()
         )
     }
 
-    private var _binding: ItemPagerBinding? = null
+    private var _binding: PostPagerBinding? = null
     private val binding get() = _binding!!
     private val navigationArgs: ViewPagerFragmentArgs by navArgs()
 
-    // Save current item state.
+    // Save current post state.
     private var currentPostId: Int = 0
     private var currentPostFeedId: Int = 0
 
@@ -58,22 +56,21 @@ class ViewPagerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = ItemPagerBinding.inflate(inflater, container, false)
+        _binding = PostPagerBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // val id = navigationArgs.itemId
         val position = navigationArgs.postPosition
         Log.i("ViewPager", "position: $position")
 
         val adapter = ViewPagerAdapter(this.requireContext()) { postId, feedId ->
-            Log.i("ViewPager", "updating item state: $postId, $feedId")
+            Log.i("ViewPager", "updating post state: $postId, $feedId")
             currentPostId = postId
             currentPostFeedId = feedId
-            markCurrentItemRead()
+            markCurrentPostRead()
         }
 
         binding.viewPager.adapter = adapter
@@ -107,7 +104,7 @@ class ViewPagerFragment : Fragment() {
         return when (item.itemId) {
             R.id.mark_unread -> {
                 Log.i("ViewPager", "hit mark unread button")
-                markCurrentItemUnread()
+                markCurrentPostUnread()
                 this.findNavController().navigateUp()
                 true
             }
@@ -115,12 +112,12 @@ class ViewPagerFragment : Fragment() {
         }
     }
 
-    private fun markCurrentItemRead() {
-        viewModel.markItemRead(currentPostId, currentPostFeedId)
+    private fun markCurrentPostRead() {
+        viewModel.markPostRead(currentPostId, currentPostFeedId)
     }
 
-    private fun markCurrentItemUnread() {
-        viewModel.markItemUnread(currentPostId, currentPostFeedId)
+    private fun markCurrentPostUnread() {
+        viewModel.markPostUnread(currentPostId, currentPostFeedId)
     }
 
     private fun setPosition(position: Int) {

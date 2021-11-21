@@ -37,7 +37,7 @@ import kotlin.collections.ArrayList
  * Main fragment displaying details for all items in the database.
  */
 class FeedListFragment : Fragment() {
-    private val viewModel: InventoryViewModel by activityViewModels {
+    private val viewModel: ArseViewModel by activityViewModels {
         InventoryViewModelFactory(
             (activity?.application as ArseApplication).database.postDao(),
             (activity?.application as ArseApplication).database.feedDao()

@@ -30,13 +30,13 @@ import kotlinx.coroutines.flow.Flow
 interface PostDao {
 
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp ASC")
-    fun getUnreadItemsInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
+    fun getUnreadPostsInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp DESC")
-    fun getUnreadItemsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
+    fun getUnreadPostsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp ASC")
-    fun getItemsInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
+    fun getPostssInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp DESC")
-    fun getItemsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
+    fun getPostsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
 
     @Query("SELECT COUNT(*) from post WHERE feed_id IN (:feedIds) AND read = 0")
     fun countUnreadPostsInFeedsLive(feedIds: IntArray): Flow<Int>
@@ -53,7 +53,7 @@ interface PostDao {
     suspend fun toggleRead(postId: Int, feedId: Int)
 
     // Specify the conflict strategy as IGNORE, when the user tries to add an
-    // existing Item into the database Room ignores the conflict.
+    // existing Post into the database Room ignores the conflict.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(post: Post)
 

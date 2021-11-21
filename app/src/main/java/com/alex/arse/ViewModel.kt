@@ -27,11 +27,8 @@ import com.alex.arse.data.Post
 import com.alex.arse.data.PostDao
 import kotlinx.coroutines.launch
 
-/**
- * View Model to keep a reference to the Inventory repository and an up-to-date list of all items.
- *
- */
-class InventoryViewModel(private val itemDao: PostDao, private val feedDao: FeedDao) : ViewModel() {
+
+class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) : ViewModel() {
 
     val allFeeds: LiveData<List<Feed>> = feedDao.getFeeds().asLiveData()
 
@@ -41,7 +38,7 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
     }
 
     /**
-     * Launching a new coroutine to update an item in a non-blocking way
+     * Launching a new coroutine to update an feed in a non-blocking way
      */
     private fun updateFeed(feed: Feed) {
         viewModelScope.launch {
@@ -57,33 +54,28 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
         }
     }
 
-    // fun markItemRead(item: Item) {
-    fun markItemRead(postId: Int, feedId: Int) {
+    fun markPostRead(postId: Int, feedId: Int) {
         viewModelScope.launch {
-            itemDao.markRead(postId, feedId)
+            postDao.markRead(postId, feedId)
         }
     }
-    fun markItemUnread(postId: Int, feedId: Int) {
+    fun markPostUnread(postId: Int, feedId: Int) {
         viewModelScope.launch {
-            itemDao.markUnread(postId, feedId)
+            postDao.markUnread(postId, feedId)
         }
     }
-    fun toggleItemRead(postId: Int, feedId: Int) {
+    fun togglePostRead(postId: Int, feedId: Int) {
         viewModelScope.launch {
-            itemDao.toggleRead(postId, feedId)
+            postDao.toggleRead(postId, feedId)
         }
     }
 
     /**
-     * Inserts the new Item into database.
+     * Inserts the new Post into database.
      */
-//    fun addNewItem(postId: Int, title: String, author: String, feedName: String, link: String, timestamp: Long, content: String) {
-//        val newItem = getNewItemEntry(postId, title, author, feedName, link, timestamp, content)
-//        insertItem(newItem)
-//    }
-    fun addNewItem(post: Post) {
+    fun addNewPost(post: Post) {
         // Will ignore if have matching (feed name + post ID) entity
-        insertItem(post)
+        insertPost(post)
     }
     fun addNewFeed(feed: Feed) {
         insertFeed(feed)
@@ -94,11 +86,11 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
     }
 
     /**
-     * Launching a new coroutine to insert an item in a non-blocking way
+     * Launching a new coroutine to insert an post in a non-blocking way
      */
-    private fun insertItem(post: Post) {
+    private fun insertPost(post: Post) {
         viewModelScope.launch {
-            itemDao.insert(post)
+            postDao.insert(post)
         }
     }
     private fun insertFeed(feed: Feed) {
@@ -108,7 +100,7 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
     }
 
     /**
-     * Launching a new coroutine to delete an item in a non-blocking way
+     * Launching a new coroutine to delete a feed in a non-blocking way
      */
     fun deleteFeed(id: Int) {
         viewModelScope.launch {
@@ -117,34 +109,34 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
     }
 
     /**
-     * Retrieve an item from the repository.
+     * Retrieve a feed from the repository.
      */
     fun retrieveFeed(feedId: Int): LiveData<Feed> {
         return feedDao.getFeed(feedId).asLiveData()
     }
 
-    fun retrieveItemsInFeeds(feedIds: IntArray, include_read: Boolean = false, ascending: Boolean = true): LiveData<List<Post>> {
+    fun retrievePostsInFeeds(feedIds: IntArray, include_read: Boolean = false, ascending: Boolean = true): LiveData<List<Post>> {
         return if (include_read) {
             if (ascending) {
-                itemDao.getItemsInFeedsAsc(feedIds).asLiveData()
+                postDao.getPostssInFeedsAsc(feedIds).asLiveData()
             } else {
-                itemDao.getItemsInFeedsDesc(feedIds).asLiveData()
+                postDao.getPostsInFeedsDesc(feedIds).asLiveData()
             }
         } else {
             if (ascending) {
-                itemDao.getUnreadItemsInFeedsAsc(feedIds).asLiveData()
+                postDao.getUnreadPostsInFeedsAsc(feedIds).asLiveData()
             } else {
-                itemDao.getUnreadItemsInFeedsDesc(feedIds).asLiveData()
+                postDao.getUnreadPostsInFeedsDesc(feedIds).asLiveData()
             }
         }
     }
 
     fun countUnreadPostsInFeedsLive(feedIds: IntArray): LiveData<Int> {
-        return itemDao.countUnreadPostsInFeedsLive(feedIds).asLiveData()
+        return postDao.countUnreadPostsInFeedsLive(feedIds).asLiveData()
     }
     fun countUnreadPostsAndRunCallback(feedIds: IntArray, callback: (count: Int) -> Unit) {
         viewModelScope.launch {
-            val count = itemDao.countUnreadPostsInFeeds(feedIds)
+            val count = postDao.countUnreadPostsInFeeds(feedIds)
             callback(count)
         }
     }
@@ -160,7 +152,7 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
     }
 
     /**
-     * Returns an instance of the [Post] entity class with the item info entered by the user.
+     * Returns an instance of the [Post] entity class with the feed info entered by the user.
      * This will be used to add a new entry to the Inventory database.
      */
     private fun getNewFeedEntry(url: String, name: String, htmlUrl: String, category: String): Feed {
@@ -186,11 +178,11 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
 /**
  * Factory class to instantiate the [ViewModel] instance.
  */
-class InventoryViewModelFactory(private val itemDao: PostDao, private val feedDao: FeedDao) : ViewModelProvider.Factory {
+class InventoryViewModelFactory(private val postDao: PostDao, private val feedDao: FeedDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(ArseViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return InventoryViewModel(itemDao, feedDao) as T
+            return ArseViewModel(postDao, feedDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

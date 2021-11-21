@@ -32,11 +32,8 @@ import com.alex.arse.databinding.FragmentPostListBinding
 import kotlinx.android.synthetic.main.fragment_post_list.*
 
 
-/**
- * Main fragment displaying details for all items in the database.
- */
 class PostListFragment : Fragment() {
-    private val viewModel: InventoryViewModel by activityViewModels {
+    private val viewModel: ArseViewModel by activityViewModels {
         InventoryViewModelFactory(
             (activity?.application as ArseApplication).database.postDao(),
             (activity?.application as ArseApplication).database.feedDao()
@@ -79,9 +76,9 @@ class PostListFragment : Fragment() {
         // Toast.makeText(this.requireContext(), "Failed to load feed URL" , Toast.LENGTH_SHORT).show()
 
         swipe_refresh.isRefreshing = true
-        Log.d("ItemListFragment", "entering FeedParser")
+        Log.d("PostListFragment", "entering FeedParser")
         na.loadFeed(navigationArgs.feedIds, navigationArgs.feedUrls, this.requireContext(), viewModel) {
-            Log.d("ItemListFragment", "refresh is done")
+            Log.d("PostListFragment", "refresh is done")
             swipe_refresh.isRefreshing = false
         }
     }
@@ -119,12 +116,12 @@ class PostListFragment : Fragment() {
                 }
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    adapter.onItemDismiss(viewHolder.adapterPosition)
+                    adapter.onPostDismiss(viewHolder.adapterPosition)
 
                     val postId = viewHolder.itemView.getTag("postId".hashCode()) as Int
                     val feedId = viewHolder.itemView.getTag("feedId".hashCode()) as Int
                     Log.v("SWIPED", postId.toString() + ", " + feedId);
-                    viewModel.markItemRead(postId, feedId)
+                    viewModel.markPostRead(postId, feedId)
                 }
             }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
@@ -155,9 +152,9 @@ class PostListFragment : Fragment() {
 
     fun observeData() {
         // Simpler way to clear existing observers?
-        viewModel.retrieveItemsInFeeds(navigationArgs.feedIds).removeObservers(this.viewLifecycleOwner)
-        viewModel.retrieveItemsInFeeds(navigationArgs.feedIds, include_read = viewRead, ascending = sortAscending).observe(this.viewLifecycleOwner) { items ->
-            items.let {
+        viewModel.retrievePostsInFeeds(navigationArgs.feedIds).removeObservers(this.viewLifecycleOwner)
+        viewModel.retrievePostsInFeeds(navigationArgs.feedIds, include_read = viewRead, ascending = sortAscending).observe(this.viewLifecycleOwner) { posts ->
+            posts.let {
                 (binding.recyclerView.adapter as PostListAdapter).submitList(it)
                 currentList = it
             }
@@ -170,7 +167,7 @@ class PostListFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.fragment_item_list_options, menu)
+        inflater.inflate(R.menu.fragment_post_list_options, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -193,19 +190,19 @@ class PostListFragment : Fragment() {
         menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         val inflater: MenuInflater = requireActivity().menuInflater
-        inflater.inflate(R.menu.fragment_item_list_context, menu)
+        inflater.inflate(R.menu.fragment_post_list_context, menu)
     }
 
     // If above is true, will go backwards; otherwise forwards.
     private fun bulkMarkRead(above: Boolean) {
         if (currentList.isNotEmpty() && longClickedPosition >= 0) {
-            // Log.i("ItemListFragment", "$longClickedPosition, ${currentList.size}")
+            // Log.i("PostListFragment", "$longClickedPosition, ${currentList.size}")
             var range = longClickedPosition+1 until currentList.size
             if (above) {
                 range = 0 until longClickedPosition
             }
             for (i in range) {
-                viewModel.markItemRead(currentList[i].postId, currentList[i].feedId)
+                viewModel.markPostRead(currentList[i].postId, currentList[i].feedId)
             }
         }
     }
@@ -213,7 +210,7 @@ class PostListFragment : Fragment() {
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.toggle_read -> {
-                viewModel.toggleItemRead(longClickedPostId, longClickedFeedId)
+                viewModel.togglePostRead(longClickedPostId, longClickedFeedId)
                 true
             }
 

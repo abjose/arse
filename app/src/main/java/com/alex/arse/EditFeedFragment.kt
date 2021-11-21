@@ -41,7 +41,7 @@ class EditFeedFragment : Fragment() {
 
     // Use the 'by activityViewModels()' Kotlin property delegate from the fragment-ktx artifact
     // to share the ViewModel across fragments.
-    private val viewModel: InventoryViewModel by activityViewModels {
+    private val viewModel: ArseViewModel by activityViewModels {
         InventoryViewModelFactory(
             (activity?.application as ArseApplication).database.postDao(),
             (activity?.application as ArseApplication).database.feedDao(),

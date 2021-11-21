@@ -351,7 +351,7 @@ class NetworkActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
+    fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context, viewModel: ArseViewModel, doneCallback: () -> Unit) {
         assert(feedIds.size == feedUrls.size)
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
             Log.i(TAG, "loading $1{feedIds.size} feed(s)")
@@ -369,7 +369,7 @@ class NetworkActivity : Activity() {
 //        }
     }
 
-    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: InventoryViewModel, doneCallback: () -> Unit) {
+    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: ArseViewModel, doneCallback: () -> Unit) {
         Log.i(TAG, "in loadXmlFromNetwork, loading $feedUrl")
         GlobalScope.launch(Dispatchers.IO) {
             var entries: List<Post> = emptyList()
@@ -395,7 +395,7 @@ class NetworkActivity : Activity() {
             Log.i(TAG, "# entries: " + entries.size)
             for (entry in entries) {
                 Log.i(TAG, entry.title)
-                viewModel.addNewItem(entry)
+                viewModel.addNewPost(entry)
             }
 
             runOnUiThread {

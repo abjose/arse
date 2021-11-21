@@ -139,6 +139,16 @@ class InventoryViewModel(private val itemDao: PostDao, private val feedDao: Feed
         }
     }
 
+    fun countUnreadPostsInFeedsLive(feedIds: IntArray): LiveData<Int> {
+        return itemDao.countUnreadPostsInFeedsLive(feedIds).asLiveData()
+    }
+    fun countUnreadPostsAndRunCallback(feedIds: IntArray, callback: (count: Int) -> Unit) {
+        viewModelScope.launch {
+            val count = itemDao.countUnreadPostsInFeeds(feedIds)
+            callback(count)
+        }
+    }
+
     /**
      * Returns true if the EditTexts are not empty
      */

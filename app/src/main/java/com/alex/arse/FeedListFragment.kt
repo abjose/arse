@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ExpandableListView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -75,6 +76,11 @@ class FeedListFragment : Fragment() {
                 binding.expandableListView.collapseGroup(position);
             } else {
                 binding.expandableListView.expandGroup(position);
+            }
+        }, { textview: TextView, feed: Feed ->
+            viewModel.countUnreadPostsAndRunCallback(intArrayOf(feed.id)) { count ->
+                // Log.i("FeedListFragment", "in countUnreadPostsAndRunCallback, got count $count")
+                textview.text = count.toString()
             }
         })
 

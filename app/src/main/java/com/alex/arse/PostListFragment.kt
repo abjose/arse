@@ -56,6 +56,8 @@ class PostListFragment : Fragment() {
     private var longClickedFeedId: Int = 0
     private var longClickedPosition: Int = -1
 
+    private var feedName: String = ""
+
     private var currentList: List<Post> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +91,7 @@ class PostListFragment : Fragment() {
 
         // RecyclerView
         val adapter = PostListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
+            (activity as AppCompatActivity).supportActionBar!!.title = feedName
             val action = PostListFragmentDirections.actionPostListFragmentToViewPagerFragment(position, navigationArgs.feedIds, currentList.toTypedArray())
             this.findNavController().navigate(action)
 
@@ -136,10 +139,11 @@ class PostListFragment : Fragment() {
 
         viewModel.retrieveFeedAndRunCallback(navigationArgs.feedIds[0]) { feed ->
             if (navigationArgs.feedIds.size == 1) {
-                (activity as AppCompatActivity).supportActionBar!!.title = feed.name
+                feedName = feed.name
             } else {
-                (activity as AppCompatActivity).supportActionBar!!.title = feed.category
+                feedName = feed.category
             }
+            (activity as AppCompatActivity).supportActionBar!!.title = feedName
         }
 
         observeData()
@@ -157,6 +161,10 @@ class PostListFragment : Fragment() {
                 (binding.recyclerView.adapter as PostListAdapter).submitList(it)
                 currentList = it
             }
+        }
+
+        viewModel.countUnreadPostsInFeedsLive(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { count ->
+            (activity as AppCompatActivity).supportActionBar!!.title = feedName + " ($count)"
         }
     }
 

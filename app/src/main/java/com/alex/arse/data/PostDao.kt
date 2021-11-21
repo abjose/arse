@@ -38,6 +38,11 @@ interface PostDao {
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp DESC")
     fun getItemsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
 
+    @Query("SELECT COUNT(*) from post WHERE feed_id IN (:feedIds) AND read = 0")
+    fun countUnreadPostsInFeedsLive(feedIds: IntArray): Flow<Int>
+    @Query("SELECT COUNT(*) from post WHERE feed_id IN (:feedIds) AND read = 0")
+    suspend fun countUnreadPostsInFeeds(feedIds: IntArray): Int
+
     // uhh
     @Query("UPDATE post SET read = 1 WHERE post_id = :postId AND feed_id = :feedId")
     suspend fun markRead(postId: Int, feedId: Int)

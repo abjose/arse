@@ -14,7 +14,8 @@ import kotlin.collections.ArrayList
 
 class FeedListAdapter internal constructor(private val context: Context,
                                            private val onTextClick: (position: Int) -> Unit,
-                                           private val onIndicatorClick: (position: Int, isExpanded: Boolean) -> Unit) :
+                                           private val onIndicatorClick: (position: Int, isExpanded: Boolean) -> Unit,
+                                           private val populateUnreadCount: (textview: TextView, feed: Feed) -> Unit) :
     BaseExpandableListAdapter() {
 
     private var categoryList: List<String> = listOf()
@@ -46,6 +47,8 @@ class FeedListAdapter internal constructor(private val context: Context,
         }
         val expandedListTextView = convertView!!.findViewById<TextView>(R.id.expandedListItem)
         expandedListTextView.text = expandedListFeed.name
+        val expandedListUnreadCount = convertView!!.findViewById<TextView>(R.id.feedlistUnreadCount)
+        populateUnreadCount(expandedListUnreadCount, expandedListFeed)
         return convertView
     }
 

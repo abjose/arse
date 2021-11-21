@@ -82,6 +82,7 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: I
             val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
             binding.itemDate.text = sdf.format(Date(post.timestamp))
 
+            // TODO: excessive to parse the whole post here - maybe need to cache?
             val contentString = Jsoup.parse(post.content).text()
             val ssb = SpannableStringBuilder("${post.title} -  ${contentString.subSequence(0, min(200, contentString.length))}")
             ssb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, post.title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

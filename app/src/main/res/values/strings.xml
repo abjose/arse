@@ -22,7 +22,8 @@
     <string name="item_price_req">Feed Name <font color="#FF0000">*</font></string>
     <string name="save_action">Save</string>
     <string name="delete_action">Delete</string>
-    <string name="load_opml_action">Load OPML</string>
+    <string name="import_opml_action">Import OPML</string>
+    <string name="export_opml_action">Export OPML</string>
     <string name="item_detail_fragment_title">Item Details</string>
     <string name="add_fragment_title">Add Item</string>
     <string name="edit_fragment_title">Edit Item</string>

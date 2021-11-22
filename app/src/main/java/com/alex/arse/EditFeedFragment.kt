@@ -88,7 +88,8 @@ class EditFeedFragment : Fragment() {
             category.setText(feed.category, TextView.BufferType.SPANNABLE)
             saveAction.setOnClickListener { updateFeed() }
             deleteAction.setOnClickListener { deleteFeed() }
-            loadOpmlAction.isVisible = false
+            importOpmlAction.isVisible = false
+            exportOpmlAction.isVisible = false
         }
     }
 
@@ -153,9 +154,22 @@ class EditFeedFragment : Fragment() {
             binding.deleteAction.isVisible = false
         }
 
-        binding.loadOpmlAction.setOnClickListener {
+        binding.importOpmlAction.setOnClickListener {
             val intent = Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select a file"), 111)
+
+            val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
+            findNavController().navigate(action)
+        }
+
+        binding.exportOpmlAction.setOnClickListener {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+                putExtra(Intent.EXTRA_TITLE, "arse.opml")
+            }
+            startActivityForResult(intent, 222)
+
             val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
             findNavController().navigate(action)
         }
@@ -177,13 +191,24 @@ class EditFeedFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == 111 && resultCode == Activity.RESULT_OK) {
-            val uri = data?.data //The uri with the location of the file
+            val uri = data?.data // The uri with the location of the file
             Log.i("Activity", "got da data, uri: " + uri.toString())
             if (uri != null) {
                 val inputStream = requireContext().contentResolver.openInputStream(uri);
                 val feeds = OPMLParser().parse(inputStream!!)
                 for (feed in feeds) {
                     viewModel.addNewFeed(feed)
+                }
+            }
+        }
+
+        if (requestCode == 222 && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data // The uri with the location of the file
+            Log.i("Activity", "writing da data, uri: " + uri.toString())
+            if (uri != null) {
+                viewModel.retrieveFeedsAndRunCallback { feeds ->
+                    val opmlString = OPMLSaver().getOPMLString(feeds)
+                    requireContext().contentResolver.openOutputStream(uri)?.write(opmlString.encodeToByteArray())
                 }
             }
         }

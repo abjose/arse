@@ -53,6 +53,12 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
             callback(feed)
         }
     }
+    fun retrieveFeedsAndRunCallback(callback: (feeds: List<Feed>) -> Unit) {
+        viewModelScope.launch {
+            val feeds = feedDao.getFeedsNow()
+            callback(feeds)
+        }
+    }
 
     fun markPostRead(postId: Int, feedId: Int) {
         viewModelScope.launch {

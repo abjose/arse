@@ -31,10 +31,11 @@ interface FeedDao {
 
     @Query("SELECT * from feed ORDER BY name ASC")
     fun getFeeds(): Flow<List<Feed>>
-
     @Query("SELECT * from feed WHERE id = :feedId")
     fun getFeed(feedId: Int): Flow<Feed>
 
+    @Query("SELECT * from feed ORDER BY name ASC")
+    suspend fun getFeedsNow(): List<Feed>
     @Query("SELECT * from feed WHERE id = :feedId")
     suspend fun getFeedNow(feedId: Int): Feed
 

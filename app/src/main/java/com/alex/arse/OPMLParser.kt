@@ -1,16 +1,21 @@
 package com.alex.arse
 
+import android.util.Log
+import android.util.Xml
 import com.alex.arse.data.Feed
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
+import org.xmlpull.v1.XmlSerializer
 import java.io.IOException
 import java.io.InputStream
+import java.io.StringWriter
+import java.util.*
 
 // We don't use namespaces
 private val ns: String? = null
 
-class OPMLParser() {
+class OPMLParser {
     var TAG = "OPMLParser"
 
     private var category: String? = null
@@ -111,5 +116,60 @@ class OPMLParser() {
                 XmlPullParser.START_TAG -> depth++
             }
         }
+    }
+}
+
+
+class OPMLSaver {
+    var TAG = "OPMLSaver"
+
+    // Convert list of feeds category->feed map
+    private fun getMapFromFeeds(feeds: List<Feed>): SortedMap<String, MutableList<Feed>> {
+        var feedCategoryMap: SortedMap<String, MutableList<Feed>> = sortedMapOf(compareBy<String> { it.toLowerCase() })
+        for (feed in feeds) {
+            if (feedCategoryMap.containsKey(feed.category)) {
+                feedCategoryMap.getValue(feed.category).add(feed)
+            } else {
+                feedCategoryMap[feed.category] = mutableListOf(feed)
+            }
+        }
+
+        return feedCategoryMap
+    }
+
+    fun getOPMLString(feeds: List<Feed>): String {
+        val feedCategoryMap = getMapFromFeeds(feeds)
+
+        val xmlSerializer: XmlSerializer = Xml.newSerializer()
+        val writer = StringWriter()
+        xmlSerializer.setOutput(writer)
+        xmlSerializer.startDocument("UTF-8", true)
+        xmlSerializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
+
+        xmlSerializer.startTag("", "opml")
+        xmlSerializer.startTag("", "body")
+        for (category in feedCategoryMap.keys) {
+            xmlSerializer.startTag("", "outline")
+            xmlSerializer.attribute("", "title", category)
+            xmlSerializer.attribute("", "text", category)
+
+            for (feed in feedCategoryMap[category]!!) {
+                xmlSerializer.startTag("", "outline")
+                // <outline text="Euronews" title="Euronews" type="rss" xmlUrl="http://feeds.feedburner.com/euronews/en/news/"/>
+                xmlSerializer.attribute("", "title", feed.name)
+                xmlSerializer.attribute("", "text", feed.name)
+                xmlSerializer.attribute("", "type", "rss")
+                xmlSerializer.attribute("", "xmlUrl", feed.url)
+                xmlSerializer.endTag("", "outline")
+            }
+
+            xmlSerializer.endTag("", "outline")
+        }
+        xmlSerializer.endTag("", "body")
+        xmlSerializer.endTag("", "opml")
+        xmlSerializer.endDocument()
+
+        // Log.i(TAG, writer.toString())
+        return writer.toString()
     }
 }

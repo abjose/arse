@@ -2,6 +2,7 @@ package com.alex.arse
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +12,9 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
+import androidx.webkit.WebViewFeature
 import com.alex.arse.data.Post
 import com.alex.arse.databinding.PagerDetailBinding
 import java.text.SimpleDateFormat
@@ -50,20 +54,30 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
 
         fun bind(post: Post) {
             binding.postName.text = post.title
-            binding.postAuthor.text = post.author
 
             val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm")
-            binding.postDate.text = sdf.format(Date(post.timestamp))
+            val tab = "    "
+            val dateAndAuthor = post.author + tab + tab + tab + sdf.format(Date(post.timestamp))
+            binding.postAuthorAndDate.text = dateAndAuthor
 
             binding.postName.setOnClickListener {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.link))
                 startActivity(context, browserIntent, null)
             }
 
+            // TODO: support light mode.
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                WebSettingsCompat.setForceDark(binding.content.settings, FORCE_DARK_ON)
+            }
+
             // binding.content.text = HtmlCompat.fromHtml(item.content, 0)
             // binding.content.settings.javaScriptEnabled = true
             // binding.content.settings.loadWithOverviewMode = true
             // binding.content.settings.useWideViewPort = true
+
+            // Hack to try to keep webview from flashing white in darkmode.
+            binding.content.setBackgroundColor(Color.argb(1, 0, 0, 0));
+
             val imageCss = "<style>img{display: inline;height: auto;width: auto;max-width: 100%;}</style>"
             binding.content.loadDataWithBaseURL(null, imageCss + post.content,"text/html", "UTF-8", null)
 

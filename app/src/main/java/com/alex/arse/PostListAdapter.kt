@@ -110,11 +110,4 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
             }
         }
     }
-
-    fun onPostDismiss(position: Int) {
-        // items.removeAt(position)
-        // actually remove from db? / mark as read
-        // notifyItemRemoved(position)
-        // onSwiped()
-    }
 }

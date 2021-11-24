@@ -106,7 +106,7 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<Post>() {
             override fun areItemsTheSame(oldPost: Post, newPost: Post): Boolean {
-                return oldPost === newPost
+                return oldPost.postId == newPost.postId
             }
 
             override fun areContentsTheSame(oldPost: Post, newPost: Post): Boolean {

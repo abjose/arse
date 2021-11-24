@@ -116,8 +116,6 @@ class PostListFragment : Fragment() {
                 }
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    adapter.onPostDismiss(viewHolder.adapterPosition)
-
                     val postId = viewHolder.itemView.getTag("postId".hashCode()) as Int
                     val feedId = viewHolder.itemView.getTag("feedId".hashCode()) as Int
                     Log.v("SWIPED", postId.toString() + ", " + feedId);

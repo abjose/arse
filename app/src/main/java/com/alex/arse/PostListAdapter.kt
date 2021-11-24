@@ -90,6 +90,7 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
             // binding.itemDescription.ellipsize = TextUtils.TruncateAt.END
             // binding.itemName.isSingleLine = true
 
+            // If already read, activate readView to "grey out".
             if (post.read) {
                 binding.readView.visibility = View.VISIBLE
             } else {
@@ -101,7 +102,7 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<Post>() {
             override fun areItemsTheSame(oldPost: Post, newPost: Post): Boolean {
-                return oldPost === newPost
+                return oldPost.postId == newPost.postId
             }
 
             override fun areContentsTheSame(oldPost: Post, newPost: Post): Boolean {

@@ -20,8 +20,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -56,6 +59,8 @@ class PostListFragment : Fragment() {
     private var feedName: String = ""
 
     private var currentList: List<Post> = listOf()
+
+    var postLiveData: LiveData<List<Post>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,10 +121,16 @@ class PostListFragment : Fragment() {
                 }
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    val postId = viewHolder.itemView.getTag("postId".hashCode()) as Int
-                    val feedId = viewHolder.itemView.getTag("feedId".hashCode()) as Int
+                    val postId = viewHolder.itemView.getTag(R.id.postId) as Int
+                    val feedId = viewHolder.itemView.getTag(R.id.feedId) as Int
                     Log.v("SWIPED", postId.toString() + ", " + feedId);
-                    viewModel.markPostRead(postId, feedId)
+                    viewModel.togglePostRead(postId, feedId)
+
+                    if (viewRead) {
+                        // TODO: be less lazy - can you just use notifyItemChanged?
+                        adapter.notifyDataSetChanged()
+                    }
+
                 }
             }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
@@ -141,37 +152,55 @@ class PostListFragment : Fragment() {
             (activity as AppCompatActivity).supportActionBar!!.title = feedName
         }
 
+        // Observe posts.
         observeData()
+
+        // Observe unread count.
+        viewModel.countUnreadPostsInFeedsLive(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { count ->
+            (activity as AppCompatActivity).supportActionBar!!.title = feedName + " ($count)"
+        }
 
         binding.floatingActionButton.setOnClickListener {
             refresh()
         }
     }
 
-    fun observeData() {
-        // Simpler way to clear existing observers?
-        viewModel.retrievePostsInFeeds(navigationArgs.feedIds).removeObservers(this.viewLifecycleOwner)
-        viewModel.retrievePostsInFeeds(navigationArgs.feedIds, include_read = viewRead, ascending = sortAscending).observe(this.viewLifecycleOwner) { posts ->
+    private fun observeData() {
+        Log.i("PostListFragment", "calling observeData")
+
+        postLiveData?.removeObservers(this.viewLifecycleOwner)
+        postLiveData = viewModel.retrievePostsInFeeds(navigationArgs.feedIds, include_read = viewRead, ascending = sortAscending)
+        postLiveData!!.observe(this.viewLifecycleOwner) { posts ->
             posts.let {
+                Log.i("PostListFragment", "in observeData, submitting list")
                 (binding.recyclerView.adapter as PostListAdapter).submitList(it)
                 currentList = it
             }
-        }
-
-        viewModel.countUnreadPostsInFeedsLive(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { count ->
-            (activity as AppCompatActivity).supportActionBar!!.title = feedName + " ($count)"
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_post_list_options, menu)
+
+        // Ehhh
+        if (viewRead) {
+            menu.getItem(0).icon = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_visibility_24)
+        } else {
+            menu.getItem(0).icon = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_visibility_off_24)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.toggle_view_read -> {
+                Log.i("onOptionsItemSelected", "toggle_view_read")
                 viewRead = !viewRead
+                if (viewRead) {
+                    item.icon = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_visibility_24)
+                } else {
+                    item.icon = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_visibility_off_24)
+                }
                 observeData()
                 true
             }

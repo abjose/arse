@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="postId" />
+    <item type="id" name="feedId" />
+    <item type="id" name="read" />
+    <item type="id" name="position" />
+</resources>

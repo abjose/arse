@@ -61,8 +61,8 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
             true
         }
         holder.bind(current)
-        holder.itemView.setTag("postId".hashCode(), current.postId)
-        holder.itemView.setTag("feedId".hashCode(), current.feedId)
+        holder.itemView.setTag(R.id.postId, current.postId)
+        holder.itemView.setTag(R.id.feedId, current.feedId)
     }
 
     class PostViewHolder(private var binding: PostListItemBinding, private val isMultiFeed: Boolean, private val viewModel: ArseViewModel) :
@@ -106,7 +106,7 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
             }
 
             override fun areContentsTheSame(oldPost: Post, newPost: Post): Boolean {
-                return oldPost.postId == newPost.postId
+                return oldPost.postId == newPost.postId && oldPost.read == newPost.read
             }
         }
     }

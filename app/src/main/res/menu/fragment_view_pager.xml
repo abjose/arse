@@ -5,7 +5,7 @@
     <!-- "Mark Favorite", should appear as action button if possible -->
     <item
         android:id="@+id/mark_unread"
-        android:icon="@drawable/ic_baseline_remove_red_eye_24"
+        android:icon="@drawable/ic_baseline_visibility_24"
         android:title="Mark unread"
         app:showAsAction="ifRoom" />
 

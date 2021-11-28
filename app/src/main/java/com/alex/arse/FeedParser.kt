@@ -171,12 +171,12 @@ class FeedParser(private val feedId: Int) {
         }
 
         if (content != null || description != null) {
-            var contentString = if (description != null) {
+            val contentString = if (description != null) {
                 Jsoup.parse(description).text()
             } else {
                 Jsoup.parse(content).text()
             }
-            description = contentString.substring(0, Math.min(200, contentString.length))
+            description = contentString.substring(0, Math.min(300, contentString.length))
         }
 
         return Post(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "",

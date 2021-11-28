@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.core.content.ContextCompat.startActivity
@@ -53,6 +54,11 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(post: Post) {
+            if (!post.read) {
+                // Try to fix issue where ScrollViews will be partially scrolled (due to recycling?)
+                binding.scrollView.fullScroll(View.FOCUS_UP)
+            }
+
             binding.postName.text = post.title
 
             val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm")

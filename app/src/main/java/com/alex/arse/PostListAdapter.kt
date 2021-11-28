@@ -69,14 +69,20 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(post: Post) {
-            binding.postAuthor.text = post.author
+            val maxAuthorLength = 30
+            if (post.author.length > maxAuthorLength) {
+                binding.postAuthor.text = post.author.substring(0, maxAuthorLength) + "..."
+            } else {
+                binding.postAuthor.text = post.author
+            }
+
             if (isMultiFeed) {
                 viewModel.retrieveFeedAndRunCallback(post.feedId) { feed ->
                     if (feed.name != post.author) {
                         if (post.author.isBlank()) {
                             binding.postAuthor.text = "${feed.name}"
                         } else {
-                            binding.postAuthor.text = "${post.author} (${feed.name})"
+                            binding.postAuthor.text = "${binding.postAuthor.text} (${feed.name})"
                         }
                     }
                 }

@@ -81,8 +81,13 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
                     }
                 }
             }
-            val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
-            binding.postDate.text = sdf.format(Date(post.timestamp))
+
+            if (post.timestamp == 0L) {
+                binding.postDate.text = "(no date)"
+            } else {
+                val sdf = SimpleDateFormat("dd MMM yyyy HH:mm")
+                binding.postDate.text = sdf.format(Date(post.timestamp))
+            }
 
             val ssb = SpannableStringBuilder("${post.title} -  ${post.description}")
             ssb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, post.title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

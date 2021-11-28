@@ -179,7 +179,7 @@ class FeedParser(private val feedId: Int) {
             description = contentString.substring(0, Math.min(300, contentString.length))
         }
 
-        return Post(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "",
+        return Post(feedId = feedId, postId = postId!!, title = title ?: "(no title)", author = author ?: "(no author)",
             link = link ?: "", timestamp = timestamp!!, description = description ?: "", content = content ?: "", read = false)
     }
 
@@ -197,7 +197,7 @@ class FeedParser(private val feedId: Int) {
     @Throws(IOException::class, XmlPullParserException::class)
     private fun readTitle(parser: XmlPullParser): String {
         parser.require(XmlPullParser.START_TAG, ns, "title")
-        val title = readText(parser)
+        val title = Jsoup.parse(readText(parser)).text()
         parser.require(XmlPullParser.END_TAG, ns, "title")
         return title
     }
@@ -336,7 +336,7 @@ fun parseDate(dateString: String): Long {
         }
     }
 
-    return -1
+    return 0L
 }
 
 class NetworkActivity : Activity() {

@@ -16,6 +16,7 @@
 
 package com.alex.arse
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -49,7 +50,7 @@ class PostListFragment : Fragment() {
     private val navigationArgs: PostListFragmentArgs by navArgs()
 
     private var viewRead: Boolean = false
-    private var sortAscending: Boolean = true
+    private var sortAscending: Boolean = false
 
     // State for handling context menu choices.
     private var longClickedPostId: Int = 0
@@ -90,6 +91,10 @@ class PostListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Update local preferencers. This should happen before update icons.
+        viewRead = readPref(getString(R.string.viewread_pref)) ?: false
+        sortAscending = readPref(getString(R.string.sortascending_pref)) ?: false
 
         // RecyclerView
         val adapter = PostListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
@@ -179,6 +184,20 @@ class PostListFragment : Fragment() {
         }
     }
 
+    private fun writePref(key: String, value: Boolean) {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+            putBoolean(key, value)
+            apply()
+        }
+    }
+
+    private fun readPref(key: String) : Boolean? {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return null
+        return sharedPref.getBoolean(key, false)
+    }
+
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_post_list_options, menu)
@@ -196,6 +215,7 @@ class PostListFragment : Fragment() {
             R.id.toggle_view_read -> {
                 Log.i("onOptionsItemSelected", "toggle_view_read")
                 viewRead = !viewRead
+                writePref(getString(R.string.viewread_pref), viewRead)
                 if (viewRead) {
                     item.icon = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_visibility_24)
                 } else {
@@ -206,6 +226,7 @@ class PostListFragment : Fragment() {
             }
             R.id.toggle_ascending -> {
                 sortAscending = !sortAscending
+                writePref(getString(R.string.sortascending_pref), sortAscending)
                 observeData()
                 true
             }

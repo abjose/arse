@@ -38,4 +38,6 @@
     <string name="edit_item">Edit Item</string>
     <string name="add_new_item">Add new item</string>
     <string name="refresh_feed">Refresh feed</string>
+    <string name="viewread_pref">com.alex.arse.viewread</string>
+    <string name="sortascending_pref">com.alex.arse.sortascending</string>
 </resources>

@@ -22,7 +22,6 @@ import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
@@ -46,7 +45,7 @@ class PostListFragment : Fragment() {
 
     private var _binding: FragmentPostListBinding? = null
     private val binding get() = _binding!!
-    private val na = NetworkActivity()
+    private val feedParserActivity = FeedParserActivity()
     private val navigationArgs: PostListFragmentArgs by navArgs()
 
     private var viewRead: Boolean = false
@@ -83,7 +82,7 @@ class PostListFragment : Fragment() {
 
         swipe_refresh.isRefreshing = true
         Log.d("PostListFragment", "entering FeedParser")
-        na.loadFeed(navigationArgs.feedIds, navigationArgs.feedUrls, this.requireContext(), viewModel) {
+        feedParserActivity.loadFeed(navigationArgs.feedIds, navigationArgs.feedUrls, this.requireContext(), viewModel) {
             Log.d("PostListFragment", "refresh is done")
             swipe_refresh.isRefreshing = false
         }

@@ -339,7 +339,7 @@ fun parseDate(dateString: String): Long {
     return 0L
 }
 
-class NetworkActivity : Activity() {
+class FeedParserActivity : Activity() {
 
     companion object {
 
@@ -408,6 +408,8 @@ class NetworkActivity : Activity() {
                 Log.i(TAG, entry.title)
                 viewModel.addNewPost(entry)
             }
+
+            viewModel.prunePosts(feedId)
 
             runOnUiThread {
                 doneCallback()

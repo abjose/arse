@@ -91,6 +91,12 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
         insertFeed(newFeed)
     }
 
+    fun prunePosts(feedId: Int) {
+        viewModelScope.launch {
+            postDao.prunePosts(feedId, R.integer.per_feed_post_limit)
+        }
+    }
+
     /**
      * Launching a new coroutine to insert an post in a non-blocking way
      */

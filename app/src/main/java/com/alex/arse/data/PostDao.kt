@@ -62,4 +62,6 @@ interface PostDao {
 
     @Delete
     suspend fun delete(post: Post)
+    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id NOT IN (SELECT post_id FROM (SELECT post_id FROM post WHERE feed_id = :feedId ORDER BY timestamp DESC LIMIT :maxPosts) AS x)")
+    suspend fun prunePosts(feedId: Int, maxPosts: Int)
 }

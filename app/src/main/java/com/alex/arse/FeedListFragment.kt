@@ -50,6 +50,10 @@ class FeedListFragment : Fragment() {
     private var state: Parcelable? = null
     private var currentPosition: Int? = null
 
+    private val feedParserActivity = FeedParserActivity()
+
+    private var refreshedAll = false
+
     // Map from category to list of Feeds.
     private var feedCategoryMap: SortedMap<String, MutableList<Feed>> = sortedMapOf(compareBy<String> {
         it.toLowerCase()
@@ -66,6 +70,12 @@ class FeedListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (!refreshedAll) {
+            // Refresh feeds if on wifi. TODO: make less hacky
+            refreshAll()
+            refreshedAll = true
+        }
 
         val adapter = FeedListAdapter(this.requireContext(), { position: Int ->
             Log.i("FeedListAdapter", "onTextClick")
@@ -167,6 +177,17 @@ class FeedListFragment : Fragment() {
 
         val action = FeedListFragmentDirections.actionFeedListFragmentToPostListFragment(feedIds, feedUrls)
         this.findNavController().navigate(action)
+    }
+
+    private fun refreshAll() {
+        viewModel.retrieveFeedsAndRunCallback { feeds ->
+            var feedIds = IntArray(feeds.size) { feeds[it].id }
+            var feedUrls: Array<String> = Array(feeds.size) { feeds[it].url }
+
+            feedParserActivity.loadFeed(feedIds, feedUrls, requireContext(), viewModel, true) {
+                Log.d("RefreshWorker", "refreshAll is done")
+            }
+        }
     }
 
     override fun onPause() {

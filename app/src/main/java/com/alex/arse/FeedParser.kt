@@ -2,6 +2,7 @@ package com.alex.arse
 
 import android.app.Activity
 import android.content.Context
+import android.net.ConnectivityManager
 import android.util.Log
 import android.widget.Toast
 import com.alex.arse.data.Post
@@ -23,6 +24,7 @@ import java.net.URL
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 // We don't use namespaces
 private val ns: String? = null
@@ -358,16 +360,25 @@ class FeedParserActivity : Activity() {
         var sPref: String? = ANY
     }
 
-    val TAG = "NetworkActivity"
+    val TAG = "FeedParserActivity"
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context, viewModel: ArseViewModel, doneCallback: () -> Unit) {
+    fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context?, viewModel: ArseViewModel, requireWifi: Boolean,  doneCallback: () -> Unit) {
+        if (requireWifi) {
+            val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkInfo = cm.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.type != ConnectivityManager.TYPE_WIFI) {
+                Log.i(TAG, "Not connected to Wi-Fi, skipping loadFeed")
+                return
+            }
+        }
+
         assert(feedIds.size == feedUrls.size)
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
             Log.i(TAG, "loading $1{feedIds.size} feed(s)")
             for (i in feedIds.indices) {
-                loadXmlFromNetwork(feedIds[i], feedUrls[i], context, viewModel, doneCallback)
+                loadXmlFromNetwork(feedIds[i], feedUrls[i], context, viewModel, !requireWifi, doneCallback)
             }
         }
 //        else if (sPref.equals(WIFI) && wifiConnected) {
@@ -380,7 +391,7 @@ class FeedParserActivity : Activity() {
 //        }
     }
 
-    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context, viewModel: ArseViewModel, doneCallback: () -> Unit) {
+    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context?, viewModel: ArseViewModel, showToast: Boolean, doneCallback: () -> Unit) {
         Log.i(TAG, "in loadXmlFromNetwork, loading $feedUrl")
         GlobalScope.launch(Dispatchers.IO) {
             var entries: List<Post> = emptyList()
@@ -394,12 +405,16 @@ class FeedParserActivity : Activity() {
                     FeedParser(feedId).parse(stream)
                 } ?: emptyList()
             } catch (e: XmlPullParserException) {
-                runOnUiThread {
-                    Toast.makeText(context, "Failed to parse feed", Toast.LENGTH_SHORT).show()
+                if (context != null && showToast) {
+                    runOnUiThread {
+                        Toast.makeText(context, "Failed to parse feed", Toast.LENGTH_SHORT).show()
+                    }
                 }
             } catch (e: FileNotFoundException) {
-                runOnUiThread {
-                    Toast.makeText(context, "Couldn't load feed", Toast.LENGTH_SHORT).show()
+                if (context != null && showToast) {
+                    runOnUiThread {
+                        Toast.makeText(context, "Couldn't load feed", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 

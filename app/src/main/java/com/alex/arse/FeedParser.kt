@@ -65,19 +65,19 @@ class FeedParser(private val feedId: Int) {
         // while (parser.next() != XmlPullParser.END_TAG) {
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.eventType != XmlPullParser.START_TAG) {
-                Log.d(TAG, "continuing, eventType: " + parser.eventType)
+                // Log.d(TAG, "continuing, eventType: " + parser.eventType)
                 continue
             }
             // Starts by looking for the entry tag
             // if (parser.name == "entry") {
             if (parser.name == "channel") {
-                Log.d(TAG, "channel; continuing")
+                // Log.d(TAG, "channel; continuing")
                 parser.next()
             } else if (parser.name == "item" || parser.name == "entry") {
-                Log.d(TAG, "reading item/entry")
+                // Log.d(TAG, "reading item/entry")
                 entries.add(readEntry(parser))
             } else {
-                Log.d(TAG, "skipping, name: " + parser.name)
+                // Log.d(TAG, "skipping, name: " + parser.name)
                 skip(parser)
             }
         }
@@ -119,47 +119,47 @@ class FeedParser(private val feedId: Int) {
 
         var TAG = "PARSER"
         if (postId != null) {
-            Log.i(TAG, "postId: " + postId!!.toString())
+            // Log.i(TAG, "postId: " + postId!!.toString())
         } else {
-            Log.i(TAG, "No postId found")
+            // Log.i(TAG, "No postId found")
         }
 
         if (title != null) {
-            Log.i(TAG, "title: " + title!!)
+            // Log.i(TAG, "title: " + title!!)
         } else {
-            Log.i(TAG, "No title found")
+            // Log.i(TAG, "No title found")
         }
 
         if (author != null) {
-            Log.i(TAG, "author: " + author!!)
+            // Log.i(TAG, "author: " + author!!)
         } else {
-            Log.i(TAG, "No author found")
+            // Log.i(TAG, "No author found")
         }
 
         if (link != null) {
-            Log.i(TAG, "link: " + link!!)
+            // Log.i(TAG, "link: " + link!!)
         } else {
-            Log.i(TAG, "No link found")
+            // Log.i(TAG, "No link found")
         }
 
         if (timestamp != null) {
-            Log.i(TAG, "timestamp: " + timestamp!!.toString())
+            // Log.i(TAG, "timestamp: " + timestamp!!.toString())
         } else {
-            Log.i(TAG, "No timestamp found")
+            // Log.i(TAG, "No timestamp found")
         }
 
         if (description != null) {
             val len = min(description.length, 100)
-            Log.i(TAG, "description: " + description!!.substring(0, len))
+            // Log.i(TAG, "description: " + description!!.substring(0, len))
         } else {
-            Log.i(TAG, "No description found")
+            // Log.i(TAG, "No description found")
         }
 
         if (content != null) {
             val len = min(content.length, 100)
-            Log.i(TAG, "content: " + content!!.substring(0, len))
+            // Log.i(TAG, "content: " + content!!.substring(0, len))
         } else {
-            Log.i(TAG, "No content found")
+            // Log.i(TAG, "No content found")
         }
 
         // Populate postId if still null.
@@ -168,7 +168,7 @@ class FeedParser(private val feedId: Int) {
         }
 
         if (content == null && description != null) {
-            Log.i(TAG, "Overwriting content")
+            // Log.i(TAG, "Overwriting content")
             content = description
         }
 
@@ -284,7 +284,7 @@ class FeedParser(private val feedId: Int) {
         val dateString = readText(parser)
         val timestamp = parseDate(dateString)
         // parser.require(XmlPullParser.END_TAG, ns, "description")
-        Log.i("PARSER", "datestring: " + dateString + " -> timestamp: " + timestamp)
+        // Log.i("PARSER", "datestring: " + dateString + " -> timestamp: " + timestamp)
         return timestamp
     }
 

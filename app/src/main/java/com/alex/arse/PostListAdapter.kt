@@ -54,10 +54,11 @@ class PostListAdapter(private val isMultiFeed: Boolean, private val viewModel: A
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val current = getItem(position)
         holder.itemView.setOnClickListener {
-            onPostClicked(position)
+            // Log.i("PostListAdapter", "Sending position $position, other options are ${holder.absoluteAdapterPosition}, ${holder.bindingAdapterPosition}, ${holder.layoutPosition}")
+            onPostClicked(holder.layoutPosition)
         }
         holder.itemView.setOnLongClickListener {
-            onPostLongClicked(current.postId, current.feedId, position)
+            onPostLongClicked(current.postId, current.feedId, holder.layoutPosition)
             true
         }
         holder.bind(current)

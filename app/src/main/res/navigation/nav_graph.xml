@@ -43,9 +43,6 @@
         <argument
             android:name="feed_ids"
             app:argType="integer[]" />
-        <argument
-            android:name="posts"
-            app:argType="com.alex.arse.data.Post[]" />
     </fragment>
     <fragment
         android:id="@+id/feedListFragment"

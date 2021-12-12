@@ -61,6 +61,7 @@ class PostListFragment : Fragment() {
     private var currentList: List<Post> = listOf()
 
     var postLiveData: LiveData<List<Post>>? = null
+    var postCountLiveData: LiveData<Int>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,9 +101,8 @@ class PostListFragment : Fragment() {
         // RecyclerView
         val adapter = PostListAdapter(navigationArgs.feedIds.size > 1, viewModel, { position: Int ->
             (activity as AppCompatActivity).supportActionBar!!.title = feedName
-            val action = PostListFragmentDirections.actionPostListFragmentToViewPagerFragment(position, navigationArgs.feedIds, currentList.toTypedArray())
+            val action = PostListFragmentDirections.actionPostListFragmentToViewPagerFragment(position, navigationArgs.feedIds)
             this.findNavController().navigate(action)
-
         }, { postId: Int, feedId: Int, position: Int ->
             longClickedPostId = postId
             longClickedFeedId = feedId
@@ -149,6 +149,14 @@ class PostListFragment : Fragment() {
             refresh()
         }
 
+        setupObservers()
+
+        binding.floatingActionButton.setOnClickListener {
+            refresh()
+        }
+    }
+
+    private fun setupObservers() {
         viewModel.retrieveFeedAndRunCallback(navigationArgs.feedIds[0]) { feed ->
             if (navigationArgs.feedIds.size == 1) {
                 feedName = feed.name
@@ -158,20 +166,11 @@ class PostListFragment : Fragment() {
             (activity as AppCompatActivity).supportActionBar!!.title = feedName
         }
 
-        // Observe posts.
-        observeData()
-
-        // Observe unread count.
-        viewModel.countUnreadPostsInFeedsLive(navigationArgs.feedIds).observe(this.viewLifecycleOwner) { count ->
-            (activity as AppCompatActivity).supportActionBar!!.title = feedName + " ($count)"
-        }
-
-        binding.floatingActionButton.setOnClickListener {
-            refresh()
-        }
+        observePosts()
+        observePostCount()
     }
 
-    private fun observeData() {
+    private fun observePosts() {
         Log.i("PostListFragment", "calling observeData")
 
         postLiveData?.removeObservers(this.viewLifecycleOwner)
@@ -181,6 +180,16 @@ class PostListFragment : Fragment() {
                 Log.i("PostListFragment", "in observeData, submitting list")
                 (binding.recyclerView.adapter as PostListAdapter).submitList(it)
                 currentList = it
+            }
+        }
+    }
+
+    private fun observePostCount() {
+        postCountLiveData?.removeObservers(this.viewLifecycleOwner)
+        postCountLiveData = viewModel.countUnreadPostsInFeedsLive(navigationArgs.feedIds)
+        postCountLiveData!!.observe(this.viewLifecycleOwner) { count ->
+            if (feedName != "") {
+                (activity as AppCompatActivity).supportActionBar!!.title = feedName + " ($count)"
             }
         }
     }
@@ -197,7 +206,6 @@ class PostListFragment : Fragment() {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return null
         return sharedPref.getBoolean(key, false)
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -222,13 +230,13 @@ class PostListFragment : Fragment() {
                 } else {
                     item.icon = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_visibility_off_24)
                 }
-                observeData()
+                observePosts()
                 true
             }
             R.id.toggle_ascending -> {
                 sortAscending = !sortAscending
                 writePref(getString(R.string.sortascending_pref), sortAscending)
-                observeData()
+                observePosts()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -265,12 +273,12 @@ class PostListFragment : Fragment() {
 
             R.id.mark_above_read -> {
                 bulkMarkRead(true)
-                observeData()
+                observePosts()
                 true
             }
             R.id.mark_below_read -> {
                 bulkMarkRead(false)
-                observeData()
+                observePosts()
                 true
             }
 

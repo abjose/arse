@@ -15,8 +15,6 @@
  */
 package com.alex.arse.data
 
-import android.os.Parcel
-import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
@@ -26,9 +24,6 @@ import androidx.room.Index
  */
 @Entity(primaryKeys=["feed_id", "post_id"], indices = [Index(value = ["feed_id", "post_id"])])
 data class Post(
-    // @PrimaryKey(autoGenerate = true)
-    // val id: Int = 0,
-
     // TODO: change this to a foreign key
     @ColumnInfo(name = "feed_id")
     val feedId: Int,
@@ -53,49 +48,4 @@ data class Post(
 
     @ColumnInfo(name = "read")
     val read: Boolean,
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readString() ?: "title",
-        parcel.readString() ?: "author",
-        parcel.readString() ?: "parcel",
-        parcel.readLong() ?: 0,
-        parcel.readString() ?: "description",
-        parcel.readString() ?: "content",
-        parcel.readByte() != 0.toByte()
-    ) {
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(feedId)
-        parcel.writeInt(postId)
-        parcel.writeString(title)
-        parcel.writeString(author)
-        parcel.writeString(link)
-        parcel.writeLong(timestamp)
-        parcel.writeString(description)
-        parcel.writeString(content)
-        parcel.writeByte(if (read) 1 else 0)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Post> {
-        override fun createFromParcel(parcel: Parcel): Post {
-            return Post(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Post?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
-
-///**
-// * Returns the passed in price in currency format.
-// */
-//fun Item.getFormattedPrice(): String =
-//    NumberFormat.getCurrencyInstance().format(itemPrice)
+)

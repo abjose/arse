@@ -206,7 +206,7 @@ class EditFeedFragment : Fragment() {
             val uri = data?.data // The uri with the location of the file
             Log.i("Activity", "writing da data, uri: " + uri.toString())
             if (uri != null) {
-                viewModel.retrieveFeedsAndRunCallback { feeds ->
+                viewModel.retrieveAllFeedsAndRunCallback { feeds ->
                     val opmlString = OPMLSaver().getOPMLString(feeds)
                     requireContext().contentResolver.openOutputStream(uri)?.write(opmlString.encodeToByteArray())
                 }

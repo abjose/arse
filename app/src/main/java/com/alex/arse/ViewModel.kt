@@ -33,7 +33,11 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
     val allFeeds: LiveData<List<Feed>> = feedDao.getFeeds().asLiveData()
 
     fun updateFeed(feedId: Int, url: String, name: String, category: String) {
-        val updatedFeed = getUpdatededEntry(feedId, url, name, "", category)
+        val updatedFeed = getUpdatedFeed(feedId, url, name, "", category, 0)
+        updateFeed(updatedFeed)
+    }
+    fun updateFeedHash(feed: Feed, newHash: Int) {
+        val updatedFeed = getUpdatedFeed(feed.id, feed.url, feed.name, "", feed.category, newHash)
         updateFeed(updatedFeed)
     }
 
@@ -53,9 +57,15 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
             callback(feed)
         }
     }
-    fun retrieveFeedsAndRunCallback(callback: (feeds: List<Feed>) -> Unit) {
+    fun retrieveFeedsAndRunCallback(feedIds: IntArray, callback: (feeds: List<Feed>) -> Unit) {
         viewModelScope.launch {
-            val feeds = feedDao.getFeedsNow()
+            val feeds = feedDao.getFeedsNow(feedIds)
+            callback(feeds)
+        }
+    }
+    fun retrieveAllFeedsAndRunCallback(callback: (feeds: List<Feed>) -> Unit) {
+        viewModelScope.launch {
+            val feeds = feedDao.getAllFeedsNow()
             callback(feeds)
         }
     }
@@ -87,7 +97,7 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
         insertFeed(feed)
     }
     fun addNewFeed(url: String, name: String, category: String) {
-        val newFeed = getNewFeedEntry(url, name, "todo", category)
+        val newFeed = getNewFeed(url, name, "todo", category)
         insertFeed(newFeed)
     }
 
@@ -163,28 +173,26 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
         return true
     }
 
-    /**
-     * Returns an instance of the [Post] entity class with the feed info entered by the user.
-     * This will be used to add a new entry to the Inventory database.
-     */
-    private fun getNewFeedEntry(url: String, name: String, htmlUrl: String, category: String): Feed {
-        return Feed(
-            url = url,
-            name = name,
-            htmlUrl = htmlUrl,
-            category = category
-        )
-    }
-
-    private fun getUpdatededEntry(id: Int, url: String, name: String, htmlUrl: String, category: String): Feed {
+    private fun getUpdatedFeed(id: Int, url: String, name: String, htmlUrl: String, category: String, hash: Int): Feed {
         return Feed(
             id = id,
             url = url,
             name = name,
             htmlUrl = htmlUrl,
-            category = category
+            category = category,
+            contentHash = hash,
         )
     }
+}
+
+fun getNewFeed(url: String, name: String, htmlUrl: String, category: String): Feed {
+    return Feed(
+        url = url,
+        name = name,
+        htmlUrl = htmlUrl,
+        category = category,
+        contentHash = 0,
+    )
 }
 
 /**

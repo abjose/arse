@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
 import android.widget.Toast
+import com.alex.arse.data.Feed
 import com.alex.arse.data.Post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -39,19 +40,10 @@ class FeedParser(private val feedId: Int) {
     @Throws(XmlPullParserException::class, IOException::class)
     fun parse(inputStream: InputStream): List<Post> {
         inputStream.use { inputStream ->
-            // get rid of leading whitespace :'(
-            var inputAsString = inputStream.bufferedReader().use { it.readText() }
-            inputAsString = inputAsString.trim()
-            // Log.i(TAG, inputAsString)
-            val newStream: InputStream = inputAsString.byteInputStream()
-
-            // val parser: XmlPullParser = Xml.newPullParser()
             val parserFactory = XmlPullParserFactory.newInstance()
             val parser = parserFactory.newPullParser()
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-            // parser.setInput(inputStream, null)
-            parser.setInput(newStream, "UTF-8")
-            //parser.setInput(inputStream, "utf-8")
+            parser.setInput(inputStream, "UTF-8")
             parser.nextTag()
             return readFeed(parser)
         }
@@ -364,7 +356,7 @@ class FeedParserActivity : Activity() {
 
     // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
     // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    fun loadFeed(feedIds: IntArray, feedUrls: Array<String>, context: Context?, viewModel: ArseViewModel, requireWifi: Boolean,  doneCallback: () -> Unit) {
+    fun loadFeeds(feeds: List<Feed>, context: Context?, viewModel: ArseViewModel, requireWifi: Boolean, doneCallback: () -> Unit) {
         if (requireWifi) {
             val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val networkInfo = cm.getActiveNetworkInfo();
@@ -374,11 +366,10 @@ class FeedParserActivity : Activity() {
             }
         }
 
-        assert(feedIds.size == feedUrls.size)
         if (sPref.equals(ANY) && (wifiConnected || mobileConnected)) {
-            Log.i(TAG, "loading $1{feedIds.size} feed(s)")
-            for (i in feedIds.indices) {
-                loadXmlFromNetwork(feedIds[i], feedUrls[i], context, viewModel, !requireWifi, doneCallback)
+            Log.i(TAG, "loading ${feeds.size} feed(s)")
+            for (i in feeds.indices) {
+                loadXmlFromNetwork(feeds[i], context, viewModel, !requireWifi, doneCallback)
             }
         }
 //        else if (sPref.equals(WIFI) && wifiConnected) {
@@ -391,8 +382,8 @@ class FeedParserActivity : Activity() {
 //        }
     }
 
-    private fun loadXmlFromNetwork(feedId: Int, feedUrl: String, context: Context?, viewModel: ArseViewModel, showToast: Boolean, doneCallback: () -> Unit) {
-        Log.i(TAG, "in loadXmlFromNetwork, loading $feedUrl")
+    private fun loadXmlFromNetwork(feed: Feed, context: Context?, viewModel: ArseViewModel, showToast: Boolean, doneCallback: () -> Unit) {
+        Log.i(TAG, "in loadXmlFromNetwork, loading ${feed.url}")
         GlobalScope.launch(Dispatchers.IO) {
             var entries: List<Post> = emptyList()
 
@@ -401,8 +392,24 @@ class FeedParserActivity : Activity() {
 //            } ?: emptyList()
 
             try {
-                entries = downloadUrl(feedUrl)?.use { stream ->
-                    FeedParser(feedId).parse(stream)
+                entries = downloadUrl(feed.url)?.use { stream ->
+                    // Grab string itself :/
+                    var inputAsString = stream.bufferedReader().use { it.readText() }
+
+                    // Compare to feed hash to see if we should skip updating.
+                    // Only look at first X characters as a gross hack to try to avoid parts of the file that change every time.
+                    val feedHash = inputAsString.subSequence(0, Math.min(inputAsString.length, 1000)).hashCode()
+                    // Log.i(TAG, "Old hash: ${feed.contentHash}; new hash: $feedHash")
+                    if (feedHash == feed.contentHash) {
+                        Log.i(TAG, "Skipping feed update for ${feed.name}, content hasn't changed.")
+                        return@use emptyList()
+                    }
+
+                    viewModel.updateFeedHash(feed, feedHash)
+
+                    // Feed's changed, trim and continue parsing.
+                    inputAsString = inputAsString.trim()
+                    FeedParser(feed.id).parse(inputAsString.byteInputStream())
                 } ?: emptyList()
             } catch (e: XmlPullParserException) {
                 if (context != null && showToast) {
@@ -424,7 +431,7 @@ class FeedParserActivity : Activity() {
                 viewModel.addNewPost(entry)
             }
 
-            viewModel.prunePosts(feedId)
+            viewModel.prunePosts(feed.id)
 
             runOnUiThread {
                 doneCallback()

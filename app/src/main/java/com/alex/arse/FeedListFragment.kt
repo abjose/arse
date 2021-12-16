@@ -180,11 +180,8 @@ class FeedListFragment : Fragment() {
     }
 
     private fun refreshAll() {
-        viewModel.retrieveFeedsAndRunCallback { feeds ->
-            var feedIds = IntArray(feeds.size) { feeds[it].id }
-            var feedUrls: Array<String> = Array(feeds.size) { feeds[it].url }
-
-            feedParserActivity.loadFeed(feedIds, feedUrls, requireContext(), viewModel, true) {
+        viewModel.retrieveAllFeedsAndRunCallback { feeds ->
+            feedParserActivity.loadFeeds(feeds, requireContext(), viewModel, true) {
                 Log.d("RefreshWorker", "refreshAll is done")
             }
         }

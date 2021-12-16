@@ -35,4 +35,7 @@ data class Feed(
     // TODO: switch to a more relational way of storing tags?
     @ColumnInfo(name = "category")
     val category: String,
+
+    @ColumnInfo(name = "content_hash")
+    val contentHash: Int,
 )

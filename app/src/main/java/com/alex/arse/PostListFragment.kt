@@ -83,10 +83,12 @@ class PostListFragment : Fragment() {
 
         swipe_refresh.isRefreshing = true
         Log.d("PostListFragment", "entering FeedParser")
-        feedParserActivity.loadFeed(navigationArgs.feedIds, navigationArgs.feedUrls, requireContext(), viewModel, false) {
-            Log.d("PostListFragment", "refresh is done")
-            if (swipe_refresh != null) {
-                swipe_refresh.isRefreshing = false
+        viewModel.retrieveFeedsAndRunCallback(navigationArgs.feedIds) { feeds ->
+            feedParserActivity.loadFeeds(feeds, requireContext(), viewModel, false) {
+                Log.d("PostListFragment", "refresh is done")
+                if (swipe_refresh != null) {
+                    swipe_refresh.isRefreshing = false
+                }
             }
         }
     }

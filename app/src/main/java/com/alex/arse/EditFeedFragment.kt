@@ -39,6 +39,8 @@ import com.alex.arse.databinding.FragmentEditFeedBinding
  */
 class EditFeedFragment : Fragment() {
 
+    val DEFAULT_CATEGORY = "Uncategorized"
+
     // Use the 'by activityViewModels()' Kotlin property delegate from the fragment-ktx artifact
     // to share the ViewModel across fragments.
     private val viewModel: ArseViewModel by activityViewModels {
@@ -98,10 +100,11 @@ class EditFeedFragment : Fragment() {
      */
     private fun addNewFeed() {
         if (isEntryValid()) {
+            val category = binding.category.text.toString()
             viewModel.addNewFeed(
                 binding.feedUrl.text.toString(),
                 binding.feedName.text.toString(),
-                binding.category.text.toString(),
+                if (category.isNotEmpty()) category else DEFAULT_CATEGORY,
             )
             val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
             findNavController().navigate(action)
@@ -113,11 +116,12 @@ class EditFeedFragment : Fragment() {
      */
     private fun updateFeed() {
         if (isEntryValid()) {
+            val category = binding.category.text.toString()
             viewModel.updateFeed(
                 navigationArgs.feedId,
                 binding.feedUrl.text.toString(),
                 binding.feedName.text.toString(),
-                binding.category.text.toString(),
+                if (category.isNotEmpty()) category else DEFAULT_CATEGORY,
             )
             val action = EditFeedFragmentDirections.actionEditFeedFragmentToFeedListFragment()
             findNavController().navigate(action)

@@ -443,7 +443,13 @@ class FeedParserActivity : Activity() {
     private fun openConnection(initialUrl: String): HttpURLConnection? {
         var url = initialUrl
         for (i in 1..10) {
-            val connection = URL(url).openConnection() as HttpURLConnection
+            var connection: HttpURLConnection? = null
+            try {
+                connection = URL(url).openConnection() as HttpURLConnection
+            } catch (e: Exception) {
+                Log.i(TAG, "Aborting due to malformed URL? $url")
+                return null
+            }
 
             var code: Int
             try {

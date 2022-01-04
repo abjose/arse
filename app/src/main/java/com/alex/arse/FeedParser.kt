@@ -190,9 +190,9 @@ class FeedParser(private val feedId: Int) {
     // Processes title tags in the feed.
     @Throws(IOException::class, XmlPullParserException::class)
     private fun readTitle(parser: XmlPullParser): String {
-        parser.require(XmlPullParser.START_TAG, ns, "title")
+        // parser.require(XmlPullParser.START_TAG, ns, "title")
         val title = Jsoup.parse(readText(parser)).text()
-        parser.require(XmlPullParser.END_TAG, ns, "title")
+        // parser.require(XmlPullParser.END_TAG, ns, "title")
         return title
     }
 

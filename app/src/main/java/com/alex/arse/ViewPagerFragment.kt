@@ -17,6 +17,7 @@
 package com.alex.arse
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -43,9 +44,7 @@ class ViewPagerFragment : Fragment() {
     private val binding get() = _binding!!
     private val navigationArgs: ViewPagerFragmentArgs by navArgs()
 
-    // Save current post state.
-    private var currentPostId: Int = 0
-    private var currentPostFeedId: Int = 0
+    private lateinit var currentPost: Post;
 
     // TODO: Copied from PostListFragment.
     private var viewRead: Boolean = false
@@ -76,10 +75,9 @@ class ViewPagerFragment : Fragment() {
         viewRead = readPref(getString(R.string.viewread_pref)) ?: false
         sortAscending = readPref(getString(R.string.sortascending_pref)) ?: false
 
-        val adapter = ViewPagerAdapter(this.requireContext()) { postId, feedId ->
-            Log.i("ViewPager", "updating post state: $postId, $feedId")
-            currentPostId = postId
-            currentPostFeedId = feedId
+        val adapter = ViewPagerAdapter(this.requireContext()) { post ->
+            Log.i("ViewPager", "updating post state: ${post.postId}, ${post.feedId}")
+            currentPost = post
             markCurrentPostRead()
         }
 
@@ -161,9 +159,22 @@ class ViewPagerFragment : Fragment() {
         // Handle item selection
         return when (item.itemId) {
             R.id.mark_unread -> {
-                Log.i("ViewPager", "hit mark unread button")
+                // Log.i("ViewPager", "hit mark unread button")
                 markCurrentPostUnread()
                 this.findNavController().navigateUp()
+                true
+            }
+            R.id.share -> {
+                // Log.i("ViewPager", "hit mark unread button")
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, currentPost.link)
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -171,11 +182,11 @@ class ViewPagerFragment : Fragment() {
     }
 
     private fun markCurrentPostRead() {
-        viewModel.markPostRead(currentPostId, currentPostFeedId)
+        viewModel.markPostRead(currentPost.postId, currentPost.feedId)
     }
 
     private fun markCurrentPostUnread() {
-        viewModel.markPostUnread(currentPostId, currentPostFeedId)
+        viewModel.markPostUnread(currentPost.postId, currentPost.feedId)
     }
 
     private fun setPosition(position: Int) {

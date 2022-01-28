@@ -26,7 +26,7 @@ import java.util.*
  */
 
 // Helpful page for setting up ViewPager: https://g403.co/android-viewpager2/
-class ViewPagerAdapter(private val context: Context, private val updateCurrentPost: (postId: Int, feedId: Int) -> Unit) :
+class ViewPagerAdapter(private val context: Context, private val updateCurrentPost: (post: Post) -> Unit) :
     ListAdapter<Post, ViewPagerAdapter.ItemDetailViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemDetailViewHolder {
@@ -45,7 +45,7 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
     fun onPostViewed(position: Int) {
         val post = getItem(position)
         Log.i("ViewPager", "onPostViewed: ${post.postId}")
-        updateCurrentPost(post.postId, post.feedId)
+        updateCurrentPost(post)
     }
 
     override fun getItemViewType(position: Int) = R.layout.pager_detail

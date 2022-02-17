@@ -168,6 +168,8 @@ class ViewPagerFragment : Fragment() {
                 // Log.i("ViewPager", "hit mark unread button")
                 val sendIntent: Intent = Intent().apply {
                     action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TITLE, currentPost.title)
+                    putExtra(Intent.EXTRA_SUBJECT, currentPost.title)
                     putExtra(Intent.EXTRA_TEXT, currentPost.link)
                     type = "text/plain"
                 }

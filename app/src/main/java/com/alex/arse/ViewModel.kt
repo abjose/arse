@@ -101,9 +101,16 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
         insertFeed(newFeed)
     }
 
-    fun prunePosts(feedId: Int) {
+    // Warning - this doesn't necessarily prune to exactly maxPosts. Seems to be a race between
+    // pruning and writing new posts.
+    fun prunePosts(feedId: Int, maxPosts: Int) {
         viewModelScope.launch {
-            postDao.prunePosts(feedId, R.integer.per_feed_post_limit)
+            // Can't get this to work as a single query :'( LIMIT doesn't seem to work
+            val postIds = postDao.getPostIdsInFeedDescNow(feedId)
+            if (postIds.size > maxPosts) {
+                val oldPostIds = postIds.subList(maxPosts, postIds.size)
+                postDao.deletePostsFromFeed(feedId, oldPostIds)
+            }
         }
     }
 
@@ -140,7 +147,7 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
     fun retrievePostsInFeeds(feedIds: IntArray, include_read: Boolean = false, ascending: Boolean = true): LiveData<List<Post>> {
         return if (include_read) {
             if (ascending) {
-                postDao.getPostssInFeedsAsc(feedIds).asLiveData()
+                postDao.getPostsInFeedsAsc(feedIds).asLiveData()
             } else {
                 postDao.getPostsInFeedsDesc(feedIds).asLiveData()
             }

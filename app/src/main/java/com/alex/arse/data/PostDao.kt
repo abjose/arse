@@ -34,7 +34,7 @@ interface PostDao {
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) AND read = 0 ORDER BY timestamp DESC")
     fun getUnreadPostsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp ASC")
-    fun getPostssInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
+    fun getPostsInFeedsAsc(feedIds: IntArray): Flow<List<Post>>
     @Query("SELECT * from post WHERE feed_id IN (:feedIds) ORDER BY timestamp DESC")
     fun getPostsInFeedsDesc(feedIds: IntArray): Flow<List<Post>>
 
@@ -62,6 +62,13 @@ interface PostDao {
 
     @Delete
     suspend fun delete(post: Post)
-    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id NOT IN (SELECT post_id FROM (SELECT post_id FROM post WHERE feed_id = :feedId ORDER BY timestamp DESC LIMIT :maxPosts) AS x)")
-    suspend fun prunePosts(feedId: Int, maxPosts: Int)
+
+    @Query("SELECT post_id FROM post WHERE feed_id = :feedId ORDER BY timestamp DESC")
+    suspend fun getPostIdsInFeedDescNow(feedId: Int): List<Int>
+
+    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id NOT IN (:posts)")
+    suspend fun pruneOtherPostsInFeed(feedId: Int, posts: List<Int>)
+
+    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id IN (:posts)")
+    suspend fun deletePostsFromFeed(feedId: Int, posts: List<Int>)
 }

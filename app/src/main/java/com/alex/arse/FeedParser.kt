@@ -431,7 +431,8 @@ class FeedParserActivity : Activity() {
                 viewModel.addNewPost(entry)
             }
 
-            viewModel.prunePosts(feed.id)
+            // R.integer.max_posts_per_feed seems to be set to max int...
+            viewModel.prunePosts(feed.id, 200)
 
             runOnUiThread {
                 doneCallback()

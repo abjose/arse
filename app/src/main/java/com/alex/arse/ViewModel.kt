@@ -108,8 +108,9 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
             // Can't get this to work as a single query :'( LIMIT doesn't seem to work
             val postIds = postDao.getPostIdsInFeedDescNow(feedId)
             if (postIds.size > maxPosts) {
-                val oldPostIds = postIds.subList(maxPosts, postIds.size)
-                postDao.deletePostsFromFeed(feedId, oldPostIds)
+                for (postId in postIds.subList(maxPosts, postIds.size)) {
+                    postDao.deletePostFromFeed(feedId, postId)
+                }
             }
         }
     }

@@ -69,6 +69,6 @@ interface PostDao {
     @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id NOT IN (:posts)")
     suspend fun pruneOtherPostsInFeed(feedId: Int, posts: List<Int>)
 
-    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id IN (:posts)")
-    suspend fun deletePostsFromFeed(feedId: Int, posts: List<Int>)
+    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id = :postId")
+    suspend fun deletePostFromFeed(feedId: Int, postId: Int)
 }

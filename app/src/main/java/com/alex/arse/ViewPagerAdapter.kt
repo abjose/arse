@@ -103,7 +103,10 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
             }
 
             // Try to fix issue where ScrollViews will be partially scrolled (due to recycling?)
-            binding.scrollView.fullScroll(View.FOCUS_UP)
+            // binding.scrollView.fullScroll(View.FOCUS_UP)
+            // Still not quite working, another one to try: https://stackoverflow.com/a/48621014
+            binding.scrollView.fling(0);
+            binding.scrollView.smoothScrollTo(0, 0);
         }
     }
 

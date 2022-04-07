@@ -105,11 +105,14 @@ class ArseViewModel(private val postDao: PostDao, private val feedDao: FeedDao) 
     // pruning and writing new posts.
     fun prunePosts(feedId: Int, maxPosts: Int) {
         viewModelScope.launch {
+            val CHUNK_SIZE = 10;
+
             // Can't get this to work as a single query :'( LIMIT doesn't seem to work
             val postIds = postDao.getPostIdsInFeedDescNow(feedId)
             if (postIds.size > maxPosts) {
-                for (postId in postIds.subList(maxPosts, postIds.size)) {
-                    postDao.deletePostFromFeed(feedId, postId)
+                val postsToRemove = postIds.subList(maxPosts, postIds.size)
+                for (chunk in postsToRemove.chunked(CHUNK_SIZE)) {
+                    postDao.deletePostsFromFeed(feedId, chunk)
                 }
             }
         }

@@ -66,9 +66,10 @@ interface PostDao {
     @Query("SELECT post_id FROM post WHERE feed_id = :feedId ORDER BY timestamp DESC")
     suspend fun getPostIdsInFeedDescNow(feedId: Int): List<Int>
 
-    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id NOT IN (:posts)")
-    suspend fun pruneOtherPostsInFeed(feedId: Int, posts: List<Int>)
-
     @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id = :postId")
     suspend fun deletePostFromFeed(feedId: Int, postId: Int)
+
+    // Warning: seems this can't handle more than a few posts at a time.
+    @Query("DELETE FROM post WHERE feed_id = :feedId AND post_id IN (:posts)")
+    suspend fun deletePostsFromFeed(feedId: Int, posts: List<Int>)
 }

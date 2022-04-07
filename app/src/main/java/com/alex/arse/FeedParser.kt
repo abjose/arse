@@ -3,6 +3,8 @@ package com.alex.arse
 import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import com.alex.arse.data.Feed
@@ -431,8 +433,12 @@ class FeedParserActivity : Activity() {
                 viewModel.addNewPost(entry)
             }
 
-            // R.integer.max_posts_per_feed seems to be set to max int...
-            viewModel.prunePosts(feed.id, 200)
+            // Delay this to attempt to avoid race condition with Post wriring :/
+            // TODO: do something smarter.
+            Handler(Looper.getMainLooper()).postDelayed({
+                // R.integer.max_posts_per_feed seems to be set to max int...
+                viewModel.prunePosts(feed.id, 200)
+            }, 1000)
 
             runOnUiThread {
                 doneCallback()

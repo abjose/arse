@@ -18,6 +18,7 @@ import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
 import androidx.webkit.WebViewFeature
 import com.alex.arse.data.Post
 import com.alex.arse.databinding.PagerDetailBinding
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -79,14 +80,16 @@ class ViewPagerAdapter(private val context: Context, private val updateCurrentPo
             // Hack to try to keep webview from flashing white in darkmode.
             binding.content.setBackgroundColor(Color.argb(1, 0, 0, 0));
 
+            var url = URL(post.link)
+            // Log.v("Woof", "${url.protocol}://${url.host}")
             val imageCss = "<style>img{display: inline;height: auto;width: auto;max-width: 100%;}</style>"
-            binding.content.loadDataWithBaseURL(null, imageCss + post.content,"text/html", "UTF-8", null)
+            binding.content.loadDataWithBaseURL("${url.protocol}://${url.host}", imageCss + post.content,"text/html", "UTF-8", null)
 
             binding.content.setOnLongClickListener {
                 val result = (it as WebView).hitTestResult
                 if (result.type == WebView.HitTestResult.ANCHOR_TYPE || result.type == WebView.HitTestResult.SRC_ANCHOR_TYPE) {
                     // If target is link, try sharing.
-                    Log.v("WebView", "it's a link! " + result.extra)
+                    // Log.v("WebView", "it's a link! " + result.extra)
 
                     val shareIntent = Intent()
                     shareIntent.action = Intent.ACTION_SEND
